@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elitr — Travel Intelligence for Points That Actually Work</title>
+  <meta name="description" content="Your points are worth more than you're getting. Elitr is an AI-powered travel intelligence platform built for sophisticated points and miles travelers." />
+  <meta property="og:title" content="Elitr — Travel Intelligence for Points That Actually Work" />
+  <meta property="og:description" content="Your points are worth more than you're getting. Elitr closes that gap." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0e0f11;
+      --ink-2: #3a3c42;
+      --ink-3: #6e7180;
+      --surface: #f7f5f1;
+      --surface-2: #eeebe5;
+      --surface-3: #e3dfd7;
+      --gold: #b89a5a;
+      --gold-light: #d4b87a;
+      --gold-pale: #f2ead8;
+      --white: #fdfcf9;
+      --border: rgba(14,15,17,0.10);
+      --border-gold: rgba(184,154,90,0.30);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --radius: 4px;
+      --radius-lg: 10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--surface);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      padding: 28px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wordmark {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .wordmark span {
+      color: var(--gold);
+    }
+
+    .nav-contact {
+      font-size: 13px;
+      color: var(--ink-3);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+
+    .nav-contact:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 72px 0 56px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 28px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-headline {
+      font-family: var(--font-serif);
+      font-size: clamp(40px, 7vw, 58px);
+      font-weight: 500;
+      line-height: 1.10;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--ink-2);
+      max-width: 520px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    /* ── CTA FORM ── */
+    .cta-form {
+      display: flex;
+      gap: 0;
+      max-width: 480px;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(184,154,90,0.08);
+      transition: box-shadow 0.2s;
+    }
+
+    .cta-form:focus-within {
+      box-shadow: 0 2px 20px rgba(184,154,90,0.18);
+      border-color: var(--gold);
+    }
+
+    .cta-form input[type="email"] {
+      flex: 1;
+      padding: 14px 18px;
+      border: none;
+      background: transparent;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      color: var(--ink);
+      outline: none;
+      min-width: 0;
+    }
+
+    .cta-form input[type="email"]::placeholder {
+      color: var(--ink-3);
+    }
+
+    .cta-form button {
+      padding: 14px 22px;
+      background: var(--gold);
+      border: none;
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .cta-form button:hover { background: var(--gold-light); }
+    .cta-form button:active { background: #a08548; }
+
+    .cta-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .cta-success {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      background: var(--gold-pale);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      color: var(--ink-2);
+      max-width: 480px;
+    }
+
+    .cta-success .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cta-success .check::after {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 9px;
+      border-right: 1.5px solid var(--white);
+      border-bottom: 1.5px solid var(--white);
+      transform: rotate(40deg) translate(-1px, -1px);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 0;
+    }
+
+    /* ── THE STORY SECTION ── */
+    .story {
+      padding: 64px 0;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 32px;
+    }
+
+    .story-pull {
+      font-family: var(--font-serif);
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    .story-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--ink-2);
+      font-weight: 300;
+    }
+
+    .story-body p + p {
+      margin-top: 18px;
+    }
+
+    .story-body strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ── SIGNAL CARD ── */
+    .signal-card {
+      margin: 40px 0;
+      background: #16181c;
+      border: 1px solid rgba(184,154,90,0.15);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .signal-card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(184,154,90,0.12);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .signal-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .signal-card-header-text {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .signal-card-body {
+      padding: 20px;
+    }
+
+    .signal-title {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 500;
+      color: #f7f5f1;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .signal-meta {
+      font-size: 12px;
+      color: #4a4c58;
+      margin-bottom: 16px;
+      letter-spacing: 0.01em;
+    }
+
+    .signal-message {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #8a8c96;
+      padding: 14px 16px;
+      background: #0e0f11;
+      border-radius: var(--radius);
+      border-left: 2px solid var(--gold);
+    }
+
+    .signal-message strong {
+      color: #f7f5f1;
+      font-weight: 500;
+    }
+
+    .signal-from {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #4a4c58;
+      font-style: italic;
+    }
+
+    /* ── SOL INTRO ── */
+    .sol-section {
+      padding: 64px 0;
+    }
+
+    .sol-name {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 6vw, 46px);
+      font-weight: 500;
+      font-style: italic;
+      color: #f7f5f1;
+      margin-bottom: 20px;
+    }
+
+    .sol-name em {
+      color: var(--gold);
+      font-style: normal;
+    }
+
+    .sol-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: #8a8c96;
+      font-weight: 300;
+      max-width: 540px;
+    }
+
+    .sol-body p + p { margin-top: 18px; }
+
+    /* ── TENETS ── */
+    .tenets {
+      padding: 56px 0;
+    }
+
+    .tenet-list {
+      list-style: none;
+      margin-top: 32px;
+    }
+
+    .tenet-list li {
+      display: flex;
+      gap: 20px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tenet-list li:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .tenet-num {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 400;
+      margin-top: 2px;
+      flex-shrink: 0;
+      width: 20px;
+    }
+
+    .tenet-content {}
+
+    .tenet-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 5px;
+      letter-spacing: -0.01em;
+    }
+
+    .tenet-desc {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--ink-2);
+      font-weight: 300;
+    }
+
+    /* ── BOTTOM CTA ── */
+    .bottom-cta {
+      padding: 72px 0 80px;
+      text-align: center;
+    }
+
+    .bottom-cta .hero-headline {
+      margin-bottom: 18px;
+    }
+
+    .bottom-cta .hero-sub {
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    .bottom-cta .cta-form {
+      margin: 0 auto;
+    }
+
+    .bottom-cta .cta-success {
+      margin: 0 auto;
+    }
+
+    .bottom-cta .cta-note {
+      text-align: center;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-wordmark {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+    }
+
+    .footer-wordmark span { color: var(--gold); }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--ink-3);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--gold); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(18px);
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.22s; }
+    .delay-3 { animation-delay: 0.36s; }
+    .delay-4 { animation-delay: 0.50s; }
+    .delay-5 { animation-delay: 0.64s; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      nav { padding-top: 20px; }
+
+      .hero { padding: 52px 0 44px; }
+
+      .cta-form {
+        flex-direction: column;
+        border-radius: var(--radius-lg);
+      }
+
+      .cta-form input[type="email"] {
+        padding: 13px 16px;
+      }
+
+      .cta-form button {
+        padding: 13px 16px;
+        text-align: center;
+        width: 100%;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- NAV -->
+    <nav>
+      <a href="/" class="wordmark">Elitr<span>.</span></a>
+      <a href="/cdn-cgi/l/email-protection#3a5848435b547a5f56534e48145b53" class="nav-contact"><span class="__cf_email__" data-cfemail="f694848f9798b6939a9f8284d8979f">[email&#160;protected]</span></a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow fade-up">Travel Intelligence</div>
+      <h1 class="hero-headline fade-up delay-1">
+        Your points are worth<br />
+        <em>significantly more</em><br />
+        than you're getting.
+      </h1>
+      <p class="hero-sub fade-up delay-2">
+        Elitr is a personal travel intelligence platform for sophisticated points and miles travelers. We track program changes, surface award availability, and tell you exactly what it means for your portfolio — before it's too late to act.
+      </p>
+
+      <!-- CTA FORM -->
+      <div class="fade-up delay-3">
+        <div class="cta-form" id="cta-form-top">
+          <input type="email" id="email-top" placeholder="your@email.com" autocomplete="email" />
+          <button onclick="handleWaitlist('top')">Request early access</button>
+        </div>
+        <div class="cta-success" id="cta-success-top">
+          <div class="check"></div>
+          You're on the list. We'll be in touch.
+        </div>
+        <p class="cta-note">Early access only. No spam, ever.</p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- THE STORY -->
+    <section class="story">
+      <p class="section-label">The Hyatt situation</p>
+
+      <p class="story-pull">
+        "Hyatt devalued points by up to 67%, effective May 2026. Most travelers heard about it weeks later."
+      </p>
+
+      <div class="story-body">
+        <p>
+          That's not a hypothetical. It happened. And if you had 80,000 Hyatt points sitting in your account, <strong>the difference between knowing on day one and knowing on day thirty-one was $600 in redemption value — gone.</strong>
+        </p>
+        <p>
+          The information was always available. What was missing was someone watching for it, understanding its specific implications for <em>your</em> balances, and telling you <strong>the move</strong> with enough lead time to make it.
+        </p>
+        <p>
+          Most of what passes for travel intelligence is written for an audience of thousands. It's accurate, occasionally useful, and completely indifferent to what's in your account. Elitr is built for one traveler at a time — starting with you, your balances, and what's actually happening right now in the programs you're in.
+        </p>
+      </div>
+
+      <!-- SIGNAL CARD removed — moved below Meet Sol -->
+
+      <div class="story-body">
+        <p>
+          This is the trust contract. You tell us what you have and where you want to go. We tell you what's actually happening and what to do about it — with enough specificity to move, and enough lead time to matter.
+        </p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- SOL -->
+    <section class="sol-section" style="background:#0e0f11; margin: 0 -24px; padding: 64px 24px; position:relative;">
+      <p class="section-label" style="color:#8a8c96;">Meet Sol</p>
+
+      <!-- SIGNAL CARD -->
+      <div class="signal-card">
+        <div class="signal-card-header">
+          <div class="signal-dot"></div>
+          <span class="signal-card-header-text">Program Alert · April 2025</span>
+        </div>
+        <div class="signal-card-body">
+          <div class="signal-title">World of Hyatt category restructure — significant devaluation incoming</div>
+          <div class="signal-meta">Effective May 1, 2026 · Affects all existing point balances</div>
+          <div class="signal-message">
+            <strong>Sol:</strong> Hyatt is restructuring property categories effective next month. Based on your 80,000-point balance, your target properties in the Maldives move from Category 6 to Category 8 — that's roughly a 60% increase in required points. <strong>We have ~30 days to book at current rates before the increase, with a 1-year booking window.</strong> Want me to check award availability at your preferred travel window?
+          </div>
+          <div class="signal-from">— Sol, your Elitr strategist</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:24px; margin-bottom:24px; margin-top:40px;">
+        <svg width="68" height="68" viewBox="0 0 140 140" aria-label="Sol mark" style="flex-shrink:0;">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#b89a5a" stroke-width="0.4" opacity="0.18"/>
+          <circle cx="70" cy="70" r="36" fill="none" stroke="#b89a5a" stroke-width="0.6" opacity="0.55"/>
+          <line x1="70" y1="28" x2="70" y2="40" stroke="#b89a5a" stroke-width="1.4" opacity="1"/>
+          <line x1="70" y1="100" x2="70" y2="112" stroke="#b89a5a" stroke-width="1.4" opacity="1"/>
+          <line x1="28" y1="70" x2="40" y2="70" stroke="#b89a5a" stroke-width="1.4" opacity="1"/>
+          <line x1="100" y1="70" x2="112" y2="70" stroke="#b89a5a" stroke-width="1.4" opacity="1"/>
+          <line x1="44.5" y1="44.5" x2="49" y2="49" stroke="#b89a5a" stroke-width="0.5" opacity="0.35"/>
+          <line x1="91" y1="91" x2="95.5" y2="95.5" stroke="#b89a5a" stroke-width="0.5" opacity="0.35"/>
+          <line x1="95.5" y1="44.5" x2="91" y2="49" stroke="#b89a5a" stroke-width="0.5" opacity="0.35"/>
+          <line x1="44.5" y1="95.5" x2="49" y2="91" stroke="#b89a5a" stroke-width="0.5" opacity="0.35"/>
+          <line x1="70" y1="44" x2="70" y2="60" stroke="#b89a5a" stroke-width="0.4" opacity="0.28"/>
+          <line x1="70" y1="80" x2="70" y2="96" stroke="#b89a5a" stroke-width="0.4" opacity="0.28"/>
+          <line x1="44" y1="70" x2="60" y2="70" stroke="#b89a5a" stroke-width="0.4" opacity="0.28"/>
+          <line x1="80" y1="70" x2="96" y2="70" stroke="#b89a5a" stroke-width="0.4" opacity="0.28"/>
+          <circle cx="70" cy="70" r="3.5" fill="#b89a5a"/>
+          <circle cx="70" cy="70" r="7.5" fill="none" stroke="#b89a5a" stroke-width="0.6" opacity="0.5"/>
+        </svg>
+        <h2 class="sol-name">This is <em>Sol.</em></h2>
+      </div>
+      <div class="sol-body">
+        <p>
+          Sol is Elitr's AI strategist — not a chatbot, not a search engine. Sol knows your portfolio. She tracks the ecosystem in real time — programs, availability, devaluations — and tells you exactly what to do next.
+        </p>
+        <p>
+          Sol continuously analyzes the travel ecosystem, filters the noise, and surfaces recommendations built around your portfolio and goals — whether that's a faster path to status, accelerated earnings, or turning everything you've accumulated into the trip you've been building toward.
+        </p>
+        <p style="font-size:13px; font-style:italic; color:#6e7180; margin-top:6px;">
+          Sol is in early development. Early access members help shape the experience.
+        </p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- TENETS -->
+    <section class="tenets">
+      <p class="section-label">What we believe</p>
+      <ul class="tenet-list">
+        <li>
+          <span class="tenet-num">01</span>
+          <div class="tenet-content">
+            <div class="tenet-title">Specificity is the product</div>
+            <div class="tenet-desc">Generic advice is everywhere. "Use your points before devaluations" helps no one. Sol tells you which points, which devaluation, and what to do by when.</div>
+          </div>
+        </li>
+        <li>
+          <span class="tenet-num">02</span>
+          <div class="tenet-content">
+            <div class="tenet-title">Timing is the value</div>
+            <div class="tenet-desc">The information advantage in points travel is almost entirely temporal. Knowing on day one versus day thirty is the difference between a Maldives suite and paying cash.</div>
+          </div>
+        </li>
+        <li>
+          <span class="tenet-num">03</span>
+          <div class="tenet-content">
+            <div class="tenet-title">Your portfolio is not average</div>
+            <div class="tenet-desc">The right move depends on your balances, your travel patterns, your preferred programs. Elitr is not a publication — it reasons from your actual situation.</div>
+          </div>
+        </li>
+        <li>
+          <span class="tenet-num">04</span>
+          <div class="tenet-content">
+            <div class="tenet-title">Intelligence, not information</div>
+            <div class="tenet-desc">More alerts is not better. Sol surfaces the signals that matter to you, filters the noise, and arrives with a recommendation — not just a notification.</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- BOTTOM CTA -->
+    <section class="bottom-cta">
+      <h2 class="hero-headline">
+        Close the gap.
+      </h2>
+      <p class="hero-sub">
+        Elitr is in private early access. Join the waitlist and be among the first to meet Sol.
+      </p>
+      <div class="cta-form" id="cta-form-bottom">
+        <input type="email" id="email-bottom" placeholder="your@email.com" autocomplete="email" />
+        <button onclick="handleWaitlist('bottom')">Request early access</button>
+      </div>
+      <div class="cta-success" id="cta-success-bottom">
+        <div class="check"></div>
+        You're on the list. We'll be in touch.
+      </div>
+      <p class="cta-note">Early access only. No spam, ever.</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <span class="footer-wordmark">Elitr<span>.</span></span>
+      <div class="footer-links">
+        <a href="/cdn-cgi/l/email-protection#6a0818130b042a0f06031e18440b03"><span class="__cf_email__" data-cfemail="5e3c2c273f301e3b32372a2c703f37">[email&#160;protected]</span></a>
+        <a href="#" onclick="scrollToForm(); return false;">Request access</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    function handleWaitlist(position) {
+      const emailId = 'email-' + position;
+      const formId = 'cta-form-' + position;
+      const successId = 'cta-success-' + position;
+      const email = document.getElementById(emailId).value.trim();
+      
+      if (!email || !email.includes('@')) {
+        document.getElementById(emailId).focus();
+        document.getElementById(emailId).style.outline = '2px solid #b89a5a';
+        setTimeout(() => {
+          document.getElementById(emailId).style.outline = '';
+        }, 1800);
+        return;
+      }
+
+      // Replace form with success state
+      document.getElementById(formId).style.display = 'none';
+      const success = document.getElementById(successId);
+      success.style.display = 'flex';
+
+      // Optional: POST to your waitlist endpoint
+      // fetch('/api/waitlist', { method: 'POST', body: JSON.stringify({ email }), headers: { 'Content-Type': 'application/json' } });
+
+      // Log to console for now — wire to your backend
+      console.log('Waitlist signup:', email);
+    }
+
+    // Allow Enter key on inputs
+    document.querySelectorAll('input[type="email"]').forEach(input => {
+      input.ad
