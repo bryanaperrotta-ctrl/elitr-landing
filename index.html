@@ -756,7 +756,7 @@
       success.style.display = 'flex';
 
       // Optional: POST to your waitlist endpoint
-      // fetch('/api/waitlist', { method: 'POST', body: JSON.stringify({ email }), headers: { 'Content-Type': 'application/json' } });
+      fetch('https://formspree.io/f/xaqlvgyq', { method: 'POST', body: JSON.stringify({ email }), headers: { 'Content-Type': 'application/json' } });
 
       // Log to console for now — wire to your backend
       console.log('Waitlist signup:', email);
