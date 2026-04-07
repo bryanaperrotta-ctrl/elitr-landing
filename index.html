@@ -734,7 +734,7 @@
 
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     async function handleWaitlist(position) {
       const emailId = 'email-' + position;
       const formId = 'cta-form-' + position;
@@ -778,6 +778,16 @@
       }
     }
 
-    // Allow Enter key on inputs
+    function scrollToForm() {
+      document.getElementById('email-top').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     document.querySelectorAll('input[type="email"]').forEach(input => {
-      input.ad
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const pos = input.id.includes('top') ? 'top' : 'bottom';
+          handleWaitlist(pos);
+        }
+      });
+    });
+  </script>
