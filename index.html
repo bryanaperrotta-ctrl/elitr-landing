@@ -3,6 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- THE PRICING CONSTANT (brief 93, decision 1). This block mirrors the Creem products
+       "Elitr Membership — Monthly (Founding)" and "Elitr Membership — Annual (Founding)" in Creem's own
+       units: integer cents and the billing-period enum verbatim. The app reads these live through
+       member/plans; this page cannot, so this block is the mirror and the ONLY place a price digit
+       lives — renderPricing() derives every number on the page from it. When the founding sale closes,
+       this block changes and nothing else does. The two numbers are Bryan's (set 2026-09-26). -->
+  <script id="elitr-pricing">
+    window.ELITR_PRICING = {
+      currency: 'USD',
+      trialDays: 7,
+      taxMode: 'exclusive',
+      plans: [
+        { plan: 'founding_monthly', cents: 1499, period: 'every-month' },
+        { plan: 'founding_annual', cents: 11988, period: 'every-year' }
+      ]
+    };
+  </script>
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -150,56 +167,26 @@
     }
 
     /* ── CTA FORM ── */
-    .cta-form {
-      display: flex;
-      gap: 0;
-      max-width: 480px;
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-lg);
-      background: var(--white);
-      overflow: hidden;
-      box-shadow: 0 2px 16px rgba(184,154,90,0.08);
-      transition: box-shadow 0.2s;
-    }
-
-    .cta-form:focus-within {
-      box-shadow: 0 2px 20px rgba(184,154,90,0.18);
-      border-color: var(--gold);
-    }
-
-    .cta-form input[type="email"] {
-      flex: 1;
-      padding: 14px 18px;
-      border: none;
-      background: transparent;
-      font-family: var(--font-sans);
-      font-size: 15px;
-      color: var(--ink);
-      outline: none;
-      min-width: 0;
-    }
-
-    .cta-form input[type="email"]::placeholder {
-      color: var(--ink-3);
-    }
-
-    .cta-form button {
+    /* ── CTA ANCHOR (brief 93) ── the trial CTA is a link to the app, never a form. Derived from the
+       retired form button's declarations, as a class on an anchor. */
+    .cta-button {
+      display: inline-block;
       padding: 14px 22px;
       background: var(--gold);
-      border: none;
+      border: 1px solid var(--gold);
+      border-radius: var(--radius-lg);
       color: var(--white);
       font-family: var(--font-sans);
       font-size: 14px;
       font-weight: 500;
       letter-spacing: 0.03em;
-      cursor: pointer;
+      text-decoration: none;
       white-space: nowrap;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      box-shadow: 0 2px 16px rgba(184,154,90,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
     }
 
-    .cta-form button:hover { background: var(--gold-light); }
-    .cta-form button:active { background: #a08548; }
+    .cta-button:hover { background: var(--gold-light); border-color: var(--gold-light); box-shadow: 0 2px 20px rgba(184,154,90,0.18); }
 
     .cta-note {
       margin-top: 12px;
@@ -208,50 +195,6 @@
       letter-spacing: 0.01em;
     }
 
-    /* ── SUCCESS STATE ── */
-    .cta-success {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      background: var(--gold-pale);
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-lg);
-      font-size: 14px;
-      color: var(--ink-2);
-      max-width: 480px;
-    }
-
-    .cta-success .check {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .cta-success .check::after {
-      content: '';
-      display: block;
-      width: 5px;
-      height: 9px;
-      border-right: 1.5px solid var(--white);
-      border-bottom: 1.5px solid var(--white);
-      transform: rotate(40deg) translate(-1px, -1px);
-    }
-
-    /* ── DIVIDER ── */
-    .divider {
-      width: 100%;
-      height: 1px;
-      background: var(--border);
-      margin: 0;
-    }
-
-    /* ── THE STORY SECTION ── */
     .story {
       padding: 64px 0;
     }
@@ -479,16 +422,80 @@
       text-align: center;
     }
 
-    .bottom-cta .cta-form {
-      margin: 0 auto;
-    }
-
-    .bottom-cta .cta-success {
-      margin: 0 auto;
-    }
-
     .bottom-cta .cta-note {
       text-align: center;
+    }
+
+    /* ── PRICING (brief 93, decision 2) ── two plan cards rendered from #elitr-pricing; empty slots until
+       renderPricing() fills them. Tokens only. */
+    .pricing {
+      padding: 56px 0;
+    }
+
+    .pricing-intro {
+      margin-top: 14px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink-2);
+      font-weight: 300;
+      max-width: 560px;
+    }
+
+    .pricing-lead {
+      margin: 26px 0 28px;
+    }
+
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .plan-card {
+      background: var(--white);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .plan-name {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .plan-price {
+      font-family: var(--font-serif);
+      font-size: 30px;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-top: 6px;
+      min-height: 33px;
+    }
+
+    .plan-per-month {
+      font-size: 13px;
+      color: var(--ink-2);
+      min-height: 1em;
+    }
+
+    .plan-lines {
+      list-style: none;
+      margin: 12px 0 18px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--ink-2);
+      font-weight: 300;
+    }
+
+    .plan-card .cta-button {
+      align-self: flex-start;
+      margin-top: auto;
     }
 
     /* ── FOOTER ── */
@@ -550,19 +557,14 @@
 
       .hero { padding: 52px 0 44px; }
 
-      .cta-form {
-        flex-direction: column;
-        border-radius: var(--radius-lg);
-      }
-
-      .cta-form input[type="email"] {
-        padding: 13px 16px;
-      }
-
-      .cta-form button {
-        padding: 13px 16px;
+      .cta-button {
+        display: block;
         text-align: center;
-        width: 100%;
+        padding: 13px 16px;
+      }
+
+      .plan-grid {
+        grid-template-columns: 1fr;
       }
 
       footer {
@@ -583,7 +585,7 @@
     <!-- NAV -->
     <nav>
       <a href="/" class="wordmark">Elitr<span>.</span></a>
-      <a href="mailto:hello@elitr.ai" class="nav-contact">hello@elitr.ai</a>
+      <a href="mailto:support@elitr.ai" class="nav-contact">support@elitr.ai</a>
     </nav>
 
     <!-- HERO -->
@@ -596,17 +598,13 @@
         Elitr is a personal travel intelligence platform for sophisticated points and miles travelers.
       </p>
 
-      <!-- CTA FORM -->
+      <!-- TRIAL CTA (brief 93, decision 3). The waitlist form and api/waitlist.js were removed at launch
+           (brief 93): the endpoint was an unauthenticated sender from hello@ and the list lives in
+           Bryan's inbox. The trial starts in the app; the day count is rendered from #elitr-pricing. -->
       <div class="fade-up delay-3">
-        <div class="cta-form" id="cta-form-top">
-          <input type="email" id="email-top" placeholder="your@email.com" autocomplete="email" />
-          <button onclick="handleWaitlist('top')">Request early access</button>
-        </div>
-        <div class="cta-success" id="cta-success-top">
-          <div class="check"></div>
-          You're on the list. We'll be in touch.
-        </div>
-        <p class="cta-note">Early access only. No spam, ever.</p>
+        <a href="https://app.elitr.ai" class="cta-button" data-cta="top">Start your <span data-trial-days></span>-day trial</a>
+        <!-- PROVISIONAL (Nicole) -->
+        <p class="cta-note"><span data-trial-days></span> days free. Cancel anytime.</p>
       </div>
     </section>
 
@@ -702,9 +700,6 @@
       <div class="sol-body">
         <p>Sol is your navigator — not a chatbot, not a search engine. Sol knows your whole portfolio: every program, every balance, every certificate. So when one program moves on you, she's already looking across the rest for the way through — the better redemption, the stronger play, the move that's yours.</p>
         <p>She reasons from your actual situation, not an audience of thousands — whether that's a faster path to status, points better spent than saved, or turning everything you've accumulated into the trip you've been building toward.</p>
-        <p style="font-size:13px; font-style:italic; color:#6e7180; margin-top:22px;">
-          Sol is in early development. Early access members help shape the experience.
-        </p>
       </div>
     </section>
 
@@ -747,97 +742,116 @@
 
     <div class="divider"></div>
 
+    <!-- PRICING (brief 93, decision 2) — every number here is rendered from #elitr-pricing. -->
+    <section class="pricing" id="pricing">
+      <div class="section-label">Membership</div>
+      <!-- PROVISIONAL (Nicole) -->
+      <p class="pricing-intro">One membership, two ways to pay. Sol reads your whole portfolio from the first day; the founding price holds for the life of your subscription.</p>
+      <div class="pricing-lead">
+        <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing">Start your <span data-trial-days></span>-day trial</a>
+      </div>
+      <div class="plan-grid">
+        <div class="plan-card" data-plan="founding_monthly">
+          <div class="plan-name">Founding · monthly</div>
+          <div class="plan-price" data-slot="price"></div>
+          <div class="plan-per-month" data-slot="per-month"></div>
+          <ul class="plan-lines">
+            <li data-slot="trial"></li>
+            <li data-slot="tax"></li>
+            <!-- PROVISIONAL (Nicole) -->
+            <li>Cancel anytime</li>
+          </ul>
+          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_monthly">Start your <span data-trial-days></span>-day trial</a>
+        </div>
+        <div class="plan-card" data-plan="founding_annual">
+          <div class="plan-name">Founding · annual</div>
+          <div class="plan-price" data-slot="price"></div>
+          <div class="plan-per-month" data-slot="per-month"></div>
+          <ul class="plan-lines">
+            <li data-slot="trial"></li>
+            <li data-slot="tax"></li>
+            <!-- PROVISIONAL (Nicole) -->
+            <li>Cancel anytime</li>
+          </ul>
+          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_annual">Start your <span data-trial-days></span>-day trial</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
     <!-- BOTTOM CTA -->
     <section class="bottom-cta">
       <h2 class="hero-headline">
         Close the gap.
       </h2>
+      <!-- PROVISIONAL (Nicole) -->
       <p class="hero-sub">
-        Elitr is in private early access. Join the waitlist and be among the first to meet Sol.
+        Elitr is open. Start your trial and meet Sol.
       </p>
-      <div class="cta-form" id="cta-form-bottom">
-        <input type="email" id="email-bottom" placeholder="your@email.com" autocomplete="email" />
-        <button onclick="handleWaitlist('bottom')">Request early access</button>
-      </div>
-      <div class="cta-success" id="cta-success-bottom">
-        <div class="check"></div>
-        You're on the list. We'll be in touch.
-      </div>
-      <p class="cta-note">Early access only. No spam, ever.</p>
+      <a href="https://app.elitr.ai" class="cta-button" data-cta="bottom">Start your <span data-trial-days></span>-day trial</a>
+      <!-- PROVISIONAL (Nicole) -->
+      <p class="cta-note"><span data-trial-days></span> days free. Cancel anytime.</p>
     </section>
 
     <!-- FOOTER -->
     <footer>
       <span class="footer-wordmark">Elitr<span>.</span></span>
       <div class="footer-links">
-        <a href="/cdn-cgi/l/email-protection#6a0818130b042a0f06031e18440b03"><span class="__cf_email__" data-cfemail="5e3c2c273f301e3b32372a2c703f37">[email&#160;protected]</span></a>
+        <a href="mailto:support@elitr.ai">support@elitr.ai</a>
         <a href="/privacy">Privacy</a>
-        <a href="#" onclick="scrollToForm(); return false;">Request access</a>
+        <!-- PROVISIONAL (Nicole) -->
+        <a href="https://app.elitr.ai" data-cta="footer">Start your trial</a>
       </div>
     </footer>
 
   </div>
 
   <script>
-    async function handleWaitlist(position) {
-      const emailId = 'email-' + position;
-      const formId = 'cta-form-' + position;
-      const successId = 'cta-success-' + position;
-      const email = document.getElementById(emailId).value.trim();
+    // ── renderPricing ── every number on the page derives from #elitr-pricing (brief 93, decision 2):
+    // Intl.NumberFormat over cents / 100, the annual's per-month figure derived only under every-year,
+    // the trial and tax lines from the constant, and every [data-trial-days] slot filled from trialDays
+    // so the day count is typed once.
+    function renderPricing() {
+      var P = window.ELITR_PRICING;
+      if (!P || !Array.isArray(P.plans)) return;
+      var fmt = function (cents) {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: P.currency }).format(cents / 100);
+      };
+      var perMonth = function (cents) { return fmt(cents / 12); };
+      P.plans.forEach(function (plan) {
+        var card = document.querySelector('.plan-card[data-plan="' + plan.plan + '"]');
+        if (!card) return;
+        var slot = function (name) { return card.querySelector('[data-slot="' + name + '"]'); };
+        var period = plan.period === 'every-year' ? ' / year' : (plan.period === 'every-month' ? ' / month' : '');
+        if (slot('price')) slot('price').textContent = fmt(plan.cents) + period;
+        // PROVISIONAL (Nicole) — the words; the figure is cents / 12, and only for a yearly plan
+        if (slot('per-month')) slot('per-month').textContent = plan.period === 'every-year' ? perMonth(plan.cents) + ' / month, billed yearly' : '';
+        // PROVISIONAL (Nicole)
+        if (slot('trial')) slot('trial').textContent = P.trialDays + ' days free';
+        // PROVISIONAL (Nicole)
+        if (slot('tax')) slot('tax').textContent = P.taxMode === 'exclusive' ? 'plus tax at checkout' : '';
+      });
+      document.querySelectorAll('[data-trial-days]').forEach(function (el) { el.textContent = P.trialDays; });
+    }
 
-      if (!email || !email.includes('@')) {
-        document.getElementById(emailId).focus();
-        document.getElementById(emailId).style.outline = '2px solid #b89a5a';
-        setTimeout(() => {
-          document.getElementById(emailId).style.outline = '';
-        }, 1800);
-        return;
-      }
-
-      const btn = document.querySelector('#' + formId + ' button');
-      btn.textContent = 'Adding you...';
-      btn.style.opacity = '0.7';
-      btn.disabled = true;
-
-      try {
-        const response = await fetch('/api/waitlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, source: position })
-        });
-
-        if (response.ok) {
-          document.getElementById(formId).style.display = 'none';
-          const success = document.getElementById(successId);
-          success.style.display = 'flex';
+    // ── the conversion event (brief 93, decision 7) ── one listener over every app-bound anchor; the
+    // position is read from the anchor's own dataset, never from a second list of names.
+    function installTrialCtaEvents() {
+      document.querySelectorAll('a[data-cta]').forEach(function (a) {
+        a.addEventListener('click', function () {
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
-            'event': 'waitlist_signup',
+            'event': 'trial_cta_click',
             'elitr_variant': (new URLSearchParams(location.search).get('m') === 'bonvoy') ? 'bonvoy' : 'hilton',
-            'form_position': position
+            'cta_position': a.dataset.cta
           });
-        } else {
-          btn.textContent = 'Try again';
-          btn.style.opacity = '1';
-          btn.disabled = false;
-        }
-      } catch (err) {
-        btn.textContent = 'Try again';
-        btn.style.opacity = '1';
-        btn.disabled = false;
-      }
-    }
-
-    function scrollToForm() {
-      document.getElementById('email-top').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    document.querySelectorAll('input[type="email"]').forEach(input => {
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          const pos = input.id.includes('top') ? 'top' : 'bottom';
-          handleWaitlist(pos);
-        }
+        });
       });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      renderPricing();
+      installTrialCtaEvents();
     });
   </script>

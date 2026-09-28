@@ -1,0 +1,7 @@
+{
+  "name": "elitr-landing",
+  "private": true,
+  "scripts": {
+    "test": "node launch-guard.test.js"
+  }
+}
