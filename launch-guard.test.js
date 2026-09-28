@@ -87,8 +87,13 @@ test('G1 (decision 1) — one pricing constant in Creem’s units; every number 
 test('G2 (decision 3) — every href is in the allowed set; every app-bound anchor carries a data-cta, and every data-cta anchor is app-bound', () => {
   const ALLOWED = new Set(['/', '/privacy', 'https://app.elitr.ai', 'mailto:support@elitr.ai']);
   const EXTERNAL_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'googletagmanager.com'];
-  // pre-existing in /privacy's contact block (Jeff's body, not this brief): the site's own root
-  const PRE_EXISTING_PRIVACY = new Set(['https://elitr.ai', 'mailto:privacy@elitr.ai']);   // privacy@ is Jeff's, exactly once — G4 counts it
+  // pre-existing in /privacy's contact block (Jeff's, not this brief): privacy@, exactly once — G4 counts it.
+  // 93-R1: the self-link to elitr.ai went with the line that carried it; an exemption for a thing that
+  // no longer exists is a pardon, so every entry here must match an href in the file.
+  const PRE_EXISTING_PRIVACY = new Set(['mailto:privacy@elitr.ai']);
+  assert.deepStrictEqual([...PRE_EXISTING_PRIVACY], ['mailto:privacy@elitr.ai'], 'the privacy exemption grew — add an entry only for an href that exists, and say why');
+  const privacyHrefs = new Set([...privacy.matchAll(/href="([^"]*)"/g)].map((m) => m[1]));
+  for (const e of PRE_EXISTING_PRIVACY) assert.ok(privacyHrefs.has(e), 'PRE_EXISTING_PRIVACY entry matches no href in /privacy: ' + e + ' — a stale exemption');
   const hrefs = (src, file) => [...src.matchAll(/href="([^"]*)"/g)].map((m) => ({ href: m[1], file }));
   const all = hrefs(index, 'index.html').concat(hrefs(privacy, 'privacy/index.html'));
   const bad = all.filter(({ href, file }) => {
@@ -123,21 +128,32 @@ test('G4 (decision 5) — one address: support@ everywhere, privacy@ once in /pr
   assert.strictEqual(pm.filter((a) => a === 'privacy@elitr.ai').length, 1, 'privacy@ must appear exactly once in /privacy — an exemption that matches nothing is a stale exemption');
   assert.deepStrictEqual(pm.filter((a) => a !== 'privacy@elitr.ai'), ['support@elitr.ai', 'support@elitr.ai'], '/privacy’s other mailtos are not support@');
   for (const w of ['hello@', 'bryan@', 'cdn-cgi', '__cf_email__']) assert.ok(!index.includes(w) && !privacy.includes(w), w + ' survives');
+  // 93-R1 G-1: a contact line that points at the site the reader is already on is gone, with its sentence
+  for (const w of ['https://elitr.ai', 'reach us at']) assert.ok(!privacy.includes(w), w + ' survives in /privacy');
 });
 
-test('G5 (decision 5) — /privacy is untouched beyond the three mechanical edits', () => {
-  let head;
-  try { head = cp.execSync('git show HEAD:privacy/index.html', { cwd: ROOT, encoding: 'utf8' }); }
+// THE LAUNCH PREDECESSOR, FIXED (93-R1 decision 3): the commit before brief 93 touched this repo. A diff
+// against HEAD re-reads HEAD every run, so once the launch commit is HEAD it asserts that the file never
+// changes again — which nothing intends — and an empty diff satisfied the predicate vacuously. The
+// constant does not move: a change to /privacy's body (Jeff's pass) is a new predicate here, not a new
+// anchor.
+const LAUNCH_PREDECESSOR = 'f72829d';
+
+test('G5 (decision 5, 93-R1) — /privacy differs from the launch predecessor only by the mechanical edits', () => {
+  let base;
+  try { base = cp.execSync('git show ' + LAUNCH_PREDECESSOR + ':privacy/index.html', { cwd: ROOT, encoding: 'utf8' }); }
   catch (e) { console.log('      G5 skipped: git unavailable (' + (e && e.message ? e.message.split('\n')[0] : e) + ') — the claim is unverified this run'); return; }
-  const a = head.split('\n'), b = rawPrivacy.split('\n');
-  // the working tree may drop lines; walk HEAD and require every HEAD line either to survive verbatim or
-  // to have matched one of the three before the change
-  const surviving = new Set(b);
+  const a = base.split('\n'), b = rawPrivacy.split('\n');
+  const surviving = new Set(b), original = new Set(a);
   const changed = a.filter((l) => !surviving.has(l));
-  for (const l of changed) assert.ok(/hello@elitr\.ai|Request access|scrollToForm/.test(l), 'a /privacy line changed that named none of hello@, Request access, scrollToForm: ' + JSON.stringify(l));
-  const added = b.filter((l) => !new Set(a).has(l));
+  const added = b.filter((l) => !original.has(l));
+  // THE SLICE IS REAL: an empty diff is the HEAD-anchored failure and reads red, never green
+  assert.ok(changed.length >= 4, 'G5 saw ' + changed.length + ' changed line(s) against ' + LAUNCH_PREDECESSOR + ' — anchored to HEAD, or the predecessor moved; do not edit the constant to go green.');
+  for (const l of changed) {
+    assert.ok(/hello@elitr\.ai|Request access|scrollToForm|https:\/\/elitr\.ai/.test(l) || l.trim() === '<br />',
+      'a /privacy line changed that named none of hello@, Request access, scrollToForm, https://elitr.ai and is not a bare <br />: ' + JSON.stringify(l));
+  }
   for (const l of added) assert.ok(/support@elitr\.ai/.test(l), 'a /privacy line was added that is not the support@ address: ' + JSON.stringify(l));
-  assert.ok(changed.length >= 3 && changed.length <= 4, 'the edit touched ' + changed.length + ' HEAD lines, not the three (or four) expected');
 });
 
 test('G6 (decision 6) — the early-access framing is gone, and every replacement sentence is flagged PROVISIONAL', () => {
