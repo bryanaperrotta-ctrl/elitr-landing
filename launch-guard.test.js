@@ -1,6 +1,7 @@
 // launch-guard.test.js — brief 93: the launch page mirrors the product and carries no second source of
 // truth. Seven decisions, seven guards, G-n to decision n. node:assert + the copied runner; reads
-// index.html and privacy/index.html from disk. Run: npm test
+// index.html, privacy/index.html and terms/index.html from disk. Brief 94: the legal pages share one
+// chrome (legal.css), /terms exists, and G5 reads the chrome, not the prose. Run: npm test
 const { test, run } = require('./_test-runner');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -11,6 +12,7 @@ const cp = require('child_process');
 const ROOT = __dirname;
 const rawIndex = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const rawPrivacy = fs.readFileSync(path.join(ROOT, 'privacy', 'index.html'), 'utf8');
+const rawTerms = fs.readFileSync(path.join(ROOT, 'terms', 'index.html'), 'utf8');
 
 // ── strip ── HTML comments, and JS comments inside <script> (block and line). Asserted below.
 function stripJs(js) {
@@ -19,7 +21,7 @@ function stripJs(js) {
 function strip(src) {
   return src.replace(/<!--[\s\S]*?-->/g, '').replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/g, (m, a, b, c) => a + stripJs(b) + c);
 }
-const index = strip(rawIndex), privacy = strip(rawPrivacy);
+const index = strip(rawIndex), privacy = strip(rawPrivacy), terms = strip(rawTerms);
 // text outside <style> and <svg>, with quoted attribute values removed: a CSS alpha, an animation delay
 // or an SVG opacity is a decimal and not a price. What remains is prose, markup text and script.
 const noStyle = (s) => s.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '').replace(/<svg\b[\s\S]*?<\/svg>/g, '').replace(/="[^"]*"/g, '=""');
@@ -85,7 +87,7 @@ test('G1 (decision 1) — one pricing constant in Creem’s units; every number 
 });
 
 test('G2 (decision 3) — every href is in the allowed set; every app-bound anchor carries a data-cta, and every data-cta anchor is app-bound', () => {
-  const ALLOWED = new Set(['/', '/privacy', 'https://app.elitr.ai', 'mailto:support@elitr.ai']);
+  const ALLOWED = new Set(['/', '/privacy', '/terms', '/legal.css', 'https://app.elitr.ai', 'mailto:support@elitr.ai']);
   const EXTERNAL_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'googletagmanager.com'];
   // pre-existing in /privacy's contact block (Jeff's, not this brief): privacy@, exactly once — G4 counts it.
   // 93-R1: the self-link to elitr.ai went with the line that carried it; an exemption for a thing that
@@ -95,7 +97,7 @@ test('G2 (decision 3) — every href is in the allowed set; every app-bound anch
   const privacyHrefs = new Set([...privacy.matchAll(/href="([^"]*)"/g)].map((m) => m[1]));
   for (const e of PRE_EXISTING_PRIVACY) assert.ok(privacyHrefs.has(e), 'PRE_EXISTING_PRIVACY entry matches no href in /privacy: ' + e + ' — a stale exemption');
   const hrefs = (src, file) => [...src.matchAll(/href="([^"]*)"/g)].map((m) => ({ href: m[1], file }));
-  const all = hrefs(index, 'index.html').concat(hrefs(privacy, 'privacy/index.html'));
+  const all = hrefs(index, 'index.html').concat(hrefs(privacy, 'privacy/index.html'), hrefs(terms, 'terms/index.html'));
   const bad = all.filter(({ href, file }) => {
     if (EXTERNAL_HOSTS.some((h) => href.includes('//' + h) || href.includes('//www.' + h))) return false;
     if (file === 'privacy/index.html' && PRE_EXISTING_PRIVACY.has(href)) return false;
@@ -110,13 +112,14 @@ test('G2 (decision 3) — every href is in the allowed set; every app-bound anch
   const positions = ctaAnchors.map((m) => m[1]);
   for (const p of ['top', 'pricing_monthly', 'pricing_annual', 'bottom', 'footer']) assert.ok(positions.includes(p), 'no anchor at position ' + p);
   assert.strictEqual(new Set(positions).size, positions.length, 'two anchors share a position');
-  assert.ok(!/<form\b/.test(index) && !/<form\b/.test(privacy), 'a form on the page');
+  assert.ok(!/<form\b/.test(index) && !/<form\b/.test(privacy) && !/<form\b/.test(terms), 'a form on the page');
+  for (const f of ['index.html', 'privacy/index.html', 'terms/index.html']) assert.ok(all.some((h) => h.file === f && h.href === '/terms'), f + ' has no Terms link in its footer (brief 94 D5)');
 });
 
 test('G3 (decision 4) — the waitlist is gone: no endpoint, no form, no script, no email input', () => {
   assert.ok(!fs.existsSync(path.join(ROOT, 'api')), 'api/ still exists — the unauthenticated sender is live');
   for (const w of ['handleWaitlist', 'scrollToForm', '/api/waitlist', 'cta-success', 'cta-form', 'type="email"']) {
-    assert.ok(!index.includes(w) && !privacy.includes(w), w + ' survives in code');
+    assert.ok(!index.includes(w) && !privacy.includes(w) && !terms.includes(w), w + ' survives in code');
   }
   assert.match(rawIndex, /The waitlist form and api\/waitlist\.js were removed at launch\s+\(brief 93\)/, 'the reason comment is gone');
 });
@@ -127,33 +130,64 @@ test('G4 (decision 5) — one address: support@ everywhere, privacy@ once in /pr
   const pm = mailtos(privacy);
   assert.strictEqual(pm.filter((a) => a === 'privacy@elitr.ai').length, 1, 'privacy@ must appear exactly once in /privacy — an exemption that matches nothing is a stale exemption');
   assert.deepStrictEqual(pm.filter((a) => a !== 'privacy@elitr.ai'), ['support@elitr.ai', 'support@elitr.ai'], '/privacy’s other mailtos are not support@');
-  for (const w of ['hello@', 'bryan@', 'cdn-cgi', '__cf_email__']) assert.ok(!index.includes(w) && !privacy.includes(w), w + ' survives');
+  // /terms (brief 94): legal@ is the notices and opt-out address (§14.1, §14.11, §18.4) and may appear; support@ may appear; nothing else
+  const tm = mailtos(terms);
+  assert.ok(tm.every((a) => a === 'support@elitr.ai' || a === 'legal@elitr.ai'), '/terms carries a mailto that is neither support@ nor legal@: ' + tm.join(', '));
+  assert.ok(count(terms, /legal@elitr\.ai/g) >= 1, 'legal@ does not appear in /terms — the notices and opt-out address is missing');
+  assert.ok(!index.includes('legal@') && !privacy.includes('legal@'), 'legal@ appears outside /terms');
+  for (const w of ['hello@', 'bryan@', 'cdn-cgi', '__cf_email__']) assert.ok(!index.includes(w) && !privacy.includes(w) && !terms.includes(w), w + ' survives');
   // 93-R1 G-1: a contact line that points at the site the reader is already on is gone, with its sentence
   for (const w of ['https://elitr.ai', 'reach us at']) assert.ok(!privacy.includes(w), w + ' survives in /privacy');
 });
 
-// THE LAUNCH PREDECESSOR, FIXED (93-R1 decision 3): the commit before brief 93 touched this repo. A diff
-// against HEAD re-reads HEAD every run, so once the launch commit is HEAD it asserts that the file never
-// changes again — which nothing intends — and an empty diff satisfied the predicate vacuously. The
-// constant does not move: a change to /privacy's body (Jeff's pass) is a new predicate here, not a new
-// anchor.
+// THE LAUNCH PREDECESSOR, FIXED (93-R1 decision 3; re-pointed by brief 94): the commit before brief 93
+// touched this repo. It no longer anchors a prose diff — Jeff's rewrite of /privacy was the body change
+// the old comment named — it anchors the CHROME: legal.css must equal, byte for byte, the <style> body
+// that /privacy carried at this commit, plus the one list rule brief 94 added. A diff against HEAD would
+// assert the file never changes again; this asserts the move was a move.
 const LAUNCH_PREDECESSOR = 'f72829d';
+const LIST_RULE = '\n    /* lists inside policy text (brief 94 D2, the one rule added with the move) */\n    .policy-text ol, .policy-text ul { margin: 0 0 16px 22px; }\n';
 
-test('G5 (decision 5, 93-R1) — /privacy differs from the launch predecessor only by the mechanical edits', () => {
+test('G5 (brief 94 D1/D2/D4) — the legal pages share one chrome: no inline style, one legal.css moved byte-for-byte, identical nav and footer, one date, no retired processor, eighteen anchored sections', () => {
+  // (1) neither legal page carries a <style>; each links legal.css exactly once
+  for (const [name, raw] of [['privacy', rawPrivacy], ['terms', rawTerms]]) {
+    assert.ok(!/<style\b/.test(raw), '/' + name + ' carries an inline <style> — the chrome is legal.css');
+    assert.strictEqual(count(raw, /href="\/legal\.css"/g), 1, '/' + name + ' does not link legal.css exactly once');
+  }
+  // (2) legal.css is the predecessor's <style> body plus the one list rule — the move was a move
+  const cssPath = path.join(ROOT, 'legal.css');
+  assert.ok(fs.existsSync(cssPath), 'legal.css is missing');
+  const css = fs.readFileSync(cssPath, 'utf8');
+  assert.ok(css.trim().length > 0, 'legal.css is empty');
+  assert.ok(css.includes(LIST_RULE), 'the one list rule brief 94 added is not in legal.css as written');
   let base;
   try { base = cp.execSync('git show ' + LAUNCH_PREDECESSOR + ':privacy/index.html', { cwd: ROOT, encoding: 'utf8' }); }
-  catch (e) { console.log('      G5 skipped: git unavailable (' + (e && e.message ? e.message.split('\n')[0] : e) + ') — the claim is unverified this run'); return; }
-  const a = base.split('\n'), b = rawPrivacy.split('\n');
-  const surviving = new Set(b), original = new Set(a);
-  const changed = a.filter((l) => !surviving.has(l));
-  const added = b.filter((l) => !original.has(l));
-  // THE SLICE IS REAL: an empty diff is the HEAD-anchored failure and reads red, never green
-  assert.ok(changed.length >= 4, 'G5 saw ' + changed.length + ' changed line(s) against ' + LAUNCH_PREDECESSOR + ' — anchored to HEAD, or the predecessor moved; do not edit the constant to go green.');
-  for (const l of changed) {
-    assert.ok(/hello@elitr\.ai|Request access|scrollToForm|https:\/\/elitr\.ai/.test(l) || l.trim() === '<br />',
-      'a /privacy line changed that named none of hello@, Request access, scrollToForm, https://elitr.ai and is not a bare <br />: ' + JSON.stringify(l));
+  catch (e) { console.log('      G5 (2) skipped: git unavailable (' + (e && e.message ? e.message.split('\n')[0] : e) + ') — the byte-for-byte claim is unverified this run'); base = null; }
+  if (base) {
+    const m = /\n  <style>\n([\s\S]*?)\n  <\/style>\n/.exec(base);
+    assert.ok(m, 'the predecessor’s <style> body was not found');
+    assert.strictEqual(css.replace(LIST_RULE, '').trim(), m[1].trim(), 'legal.css minus the list rule is not the predecessor’s <style> body — the move edited the CSS, which is a different brief');
   }
-  for (const l of added) assert.ok(/support@elitr\.ai/.test(l), 'a /privacy line was added that is not the support@ address: ' + JSON.stringify(l));
+  // (3) the nav and footer blocks are byte-identical across the two legal pages
+  const block = (raw, tag) => { const i = raw.indexOf('<' + tag + '>'), j = raw.indexOf('</' + tag + '>', i); assert.ok(i >= 0 && j > i, tag + ' block missing'); return raw.slice(i, j + tag.length + 3); };
+  assert.strictEqual(block(rawPrivacy, 'nav'), block(rawTerms, 'nav'), 'the two legal pages’ <nav> blocks differ');
+  assert.strictEqual(block(rawPrivacy, 'footer'), block(rawTerms, 'footer'), 'the two legal pages’ <footer> blocks differ');
+  // (4) one date, typed once per page, the same on both, not 2025
+  const meta = (raw) => { const m2 = /<p class="page-meta">([^<]*)<\/p>/.exec(raw); assert.ok(m2, 'page-meta missing'); return m2[1]; };
+  const eff = (raw) => { const m2 = /Effective date: ([A-Z][a-z]+ \d{1,2}, \d{4})/.exec(meta(raw)); assert.ok(m2, 'no Effective date in page-meta'); return m2[1]; };
+  assert.strictEqual(eff(rawPrivacy), eff(rawTerms), 'the two pages carry different effective dates');
+  assert.ok(!/2025/.test(eff(rawPrivacy)), 'the effective date is in 2025');
+  assert.strictEqual(count(rawPrivacy, /<p class="page-meta">/g), 1); assert.strictEqual(count(rawTerms, /<p class="page-meta">/g), 1);
+  assert.ok(!/Effective date:/.test(privacy.replace(/<p class="page-meta">[^<]*<\/p>/, '')) && !/Effective date:/.test(terms.replace(/<p class="page-meta">[^<]*<\/p>/, '')), 'the effective date is typed a second time on a page');
+  assert.ok(/Last updated: /.test(meta(rawPrivacy)) && !/Last updated/.test(meta(rawTerms)), 'the page-meta shapes moved');
+  // (5) the retired processor and the one we never had are on no page
+  for (const w of ['AwardWallet', 'seats.aero']) for (const [name, src] of [['index.html', index], ['privacy', privacy], ['terms', terms]]) assert.ok(!src.includes(w), w + ' survives in ' + name);
+  // (6) every section anchor s-1 … s-18, exactly once
+  for (let n = 1; n <= 18; n++) assert.strictEqual(count(rawTerms, new RegExp('id="s-' + n + '"', 'g')), 1, '/terms#s-' + n + ' is not exactly one anchor');
+  assert.strictEqual(count(rawTerms, /id="s-\d+"/g), 18, 'a section anchor beyond s-18');
+  assert.match(rawTerms, /<div class="policy-section" id="s-14">\s*<p class="section-label">Section 14<\/p>\s*<h2 class="section-heading">Binding Confidential Arbitration; Class-Action Waiver<\/h2>/, 'Section 14 is not the arbitration section — the app links /terms#s-14');
+  assert.strictEqual(count(rawTerms, /<p><strong>PLEASE READ/g), 2, 'the two all-caps notices are not two');
+  assert.ok(!/\[/.test(terms.replace(/<[^>]+>/g, '')) && !/\[/.test(privacy.replace(/<[^>]+>/g, '')), 'a bracket note survives in a legal page’s text');
 });
 
 test('G6 (decision 6) — the early-access framing is gone, and every replacement sentence is flagged PROVISIONAL', () => {
