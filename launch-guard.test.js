@@ -47,7 +47,7 @@ const count = (s, re) => (s.match(re) || []).length;
 test('the strip is real — the deletion comment names waitlist and hello@, and the scans do not see them', () => {
   assert.ok(/waitlist/.test(rawIndex) && /hello@/.test(rawIndex), 'the reason comment naming the removed waitlist and hello@ is gone');
   assert.ok(!/waitlist|hello@/.test(index), 'the strip does not strip HTML comments');
-  assert.ok(/PROVISIONAL \(Nicole\) — the words/.test(rawIndex) && !/PROVISIONAL \(Nicole\) — the words/.test(index), 'the strip does not strip JS line comments');
+  assert.ok(/COPY \(Nicole 2026-09-29\) — the words/.test(rawIndex) && !/COPY \(Nicole 2026-09-29\) — the words/.test(index), 'the strip does not strip JS line comments');
 });
 
 test('G1 (decision 1) — one pricing constant in Creem’s units; every number on the page derives from it; no price digit lives anywhere else', () => {
@@ -190,16 +190,34 @@ test('G5 (brief 94 D1/D2/D4) — the legal pages share one chrome: no inline sty
   assert.ok(!/\[/.test(terms.replace(/<[^>]+>/g, '')) && !/\[/.test(privacy.replace(/<[^>]+>/g, '')), 'a bracket note survives in a legal page’s text');
 });
 
-test('G6 (decision 6) — the early-access framing is gone, and every replacement sentence is flagged PROVISIONAL', () => {
+test('G6 (decision 6; brief 98) — the early-access framing is gone, every replacement sentence carries its attribution, and no PROVISIONAL survives', () => {
   for (const w of ['early access', 'Early access', 'early development', 'waitlist', 'Request access', 'private early access', 'on the list']) {
     assert.ok(!index.includes(w), w + ' survives in index.html');
   }
-  assert.ok(count(rawIndex, /PROVISIONAL \(Nicole\)/g) >= 3, 'fewer than three PROVISIONAL flags — a FLOOR: the two notes and the bottom sub carry copy');
-  // each replacement site carries its flag within its own element or immediately before it
-  for (const re of [/<!-- PROVISIONAL \(Nicole\) -->\s*<p class="cta-note">/g, /<!-- PROVISIONAL \(Nicole\) -->\s*<p class="hero-sub">/g, /<!-- PROVISIONAL \(Nicole\) -->\s*<a href="https:\/\/app\.elitr\.ai" data-cta="footer">/g]) {
-    assert.ok(re.test(rawIndex), 'a replacement site without its PROVISIONAL flag: ' + re);
+  // brief 98: attribution was the property and the placeholder word retires — the same sites, the same floor,
+  // now under COPY (…); Nicole's own sites carry her date, the two lines she has not seen carry "pending"
+  assert.ok(count(rawIndex, /COPY \(/g) >= 3, 'fewer than three COPY markers — a FLOOR: the two notes and the bottom sub carry copy');
+  assert.strictEqual(count(rawIndex, /PROVISIONAL/g), 0, 'a PROVISIONAL flag survives in index.html — the launch page copy is Nicole’s (brief 98)');
+  for (const re of [/<!-- COPY \(Nicole 2026-09-29\) -->\s*<p class="cta-note">/g, /<!-- COPY \(Nicole 2026-09-29\) -->\s*<p class="hero-sub">/g, /<!-- COPY \(Nicole 2026-09-29\) -->\s*<a href="https:\/\/app\.elitr\.ai" data-cta="footer">/g]) {
+    assert.ok(re.test(rawIndex), 'a replacement site without its attribution: ' + re);
   }
-  assert.strictEqual(count(rawIndex, /<!-- PROVISIONAL \(Nicole\) -->\s*<p class="cta-note">/g), 2, 'both cta-notes are flagged');
+  assert.strictEqual(count(rawIndex, /<!-- COPY \(Nicole 2026-09-29\) -->\s*<p class="cta-note">/g), 2, 'both cta-notes are attributed');
+  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g), 2, 'the two lines she has not seen (the cut intro, the annual bullet) are not exactly two');
+  // her strings, verbatim (brief 98)
+  assert.strictEqual(count(index, /<p class="cta-note"><span data-trial-days><\/span> days free\. Cancel any time\.<\/p>/g), 2, 'the notes are not hers');
+  assert.strictEqual(count(index, /data-cta="(top|pricing|pricing_monthly|pricing_annual|bottom)">Start <span data-trial-days><\/span> days free<\/a>/g), 5, 'the five trial buttons do not read Start N days free');
+  assert.strictEqual(count(index, /<li>Cancel any time<\/li>/g), 2, 'both cards do not carry Cancel any time');
+  assert.strictEqual(count(index, /<li>Founding price holds for as long as you stay<\/li>/g), 1, 'the founding promise is not on exactly one card');
+  const annual = index.slice(index.indexOf('data-plan="founding_annual"'), index.indexOf('data-cta="pricing_annual"'));
+  const monthly = index.slice(index.indexOf('data-plan="founding_monthly"'), index.indexOf('data-cta="pricing_monthly"'));
+  assert.ok(/Founding price holds/.test(annual) && !/Founding price holds/.test(monthly), 'the promise is on the wrong card — it is true for the annual plan only (Terms §7.5)');
+  assert.match(index, /<p class="pricing-intro">One membership, two ways to pay for it\. Sol reads your whole portfolio from day one\.<\/p>/, 'the intro is not the cut sentence');
+  assert.ok(!/founding price holds for the life/i.test(index), 'the founding clause survives above both cards');
+  assert.match(index, /' \/ month, billed once a year'/, 'the per-month line is not hers');
+  assert.match(rawIndex, /<title>Elitr — Sol reads your points, your cards, and what's closing this week<\/title>/);
+  assert.match(rawIndex, /<meta property="og:title" content="Elitr — Sol reads your points, your cards, and what's closing this week" \/>/);
+  assert.match(rawIndex, /<meta name="description" content="A travel intelligence platform for points-and-miles travelers\. Sol, your navigator, reads your programs and your cards and answers in specifics — what's showing, what's closing, and when it was read\." \/>/);
+  assert.match(rawIndex, /<meta property="og:description" content="When a program devalues what you've saved, Sol reads what changed and what's still open — in specifics, with the time it was read\." \/>/);
   assert.ok(!/font-style:italic; color:#6e7180; margin-top:22px/.test(rawIndex), 'the Sol section’s italic line survives');
 });
 

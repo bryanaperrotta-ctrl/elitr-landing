@@ -35,10 +35,10 @@
       window.dataLayer.push({ 'elitr_variant': variant });
     })();
   </script>
-  <title>Elitr — Your points are worth more than you're getting</title>
-  <meta name="description" content="A personal travel intelligence platform for sophisticated points and miles travelers. When a program devalues what you've saved, Elitr finds the move you didn't know you had." />
-  <meta property="og:title" content="Elitr — Your points are worth more than you're getting" />
-  <meta property="og:description" content="When a program devalues what you've saved, you have more moves than they're counting on. Elitr helps you find yours." />
+  <title>Elitr — Sol reads your points, your cards, and what's closing this week</title>
+  <meta name="description" content="A travel intelligence platform for points-and-miles travelers. Sol, your navigator, reads your programs and your cards and answers in specifics — what's showing, what's closing, and when it was read." />
+  <meta property="og:title" content="Elitr — Sol reads your points, your cards, and what's closing this week" />
+  <meta property="og:description" content="When a program devalues what you've saved, Sol reads what changed and what's still open — in specifics, with the time it was read." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -602,9 +602,9 @@
            (brief 93): the endpoint was an unauthenticated sender from hello@ and the list lives in
            Bryan's inbox. The trial starts in the app; the day count is rendered from #elitr-pricing. -->
       <div class="fade-up delay-3">
-        <a href="https://app.elitr.ai" class="cta-button" data-cta="top">Start your <span data-trial-days></span>-day trial</a>
-        <!-- PROVISIONAL (Nicole) -->
-        <p class="cta-note"><span data-trial-days></span> days free. Cancel anytime.</p>
+        <a href="https://app.elitr.ai" class="cta-button" data-cta="top">Start <span data-trial-days></span> days free</a>
+        <!-- COPY (Nicole 2026-09-29) -->
+        <p class="cta-note"><span data-trial-days></span> days free. Cancel any time.</p>
       </div>
     </section>
 
@@ -745,10 +745,10 @@
     <!-- PRICING (brief 93, decision 2) — every number here is rendered from #elitr-pricing. -->
     <section class="pricing" id="pricing">
       <div class="section-label">Membership</div>
-      <!-- PROVISIONAL (Nicole) -->
-      <p class="pricing-intro">One membership, two ways to pay. Sol reads your whole portfolio from the first day; the founding price holds for the life of your subscription.</p>
+      <!-- COPY (pending Nicole) — brief 98 D2: her sentence, with the founding clause moved to the annual card -->
+      <p class="pricing-intro">One membership, two ways to pay for it. Sol reads your whole portfolio from day one.</p>
       <div class="pricing-lead">
-        <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing">Start your <span data-trial-days></span>-day trial</a>
+        <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing">Start <span data-trial-days></span> days free</a>
       </div>
       <div class="plan-grid">
         <div class="plan-card" data-plan="founding_monthly">
@@ -758,10 +758,10 @@
           <ul class="plan-lines">
             <li data-slot="trial"></li>
             <li data-slot="tax"></li>
-            <!-- PROVISIONAL (Nicole) -->
-            <li>Cancel anytime</li>
+            <!-- COPY (Nicole 2026-09-29) -->
+            <li>Cancel any time</li>
           </ul>
-          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_monthly">Start your <span data-trial-days></span>-day trial</a>
+          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_monthly">Start <span data-trial-days></span> days free</a>
         </div>
         <div class="plan-card" data-plan="founding_annual">
           <div class="plan-name">Founding · annual</div>
@@ -770,10 +770,12 @@
           <ul class="plan-lines">
             <li data-slot="trial"></li>
             <li data-slot="tax"></li>
-            <!-- PROVISIONAL (Nicole) -->
-            <li>Cancel anytime</li>
+            <!-- COPY (Nicole 2026-09-29) -->
+            <li>Cancel any time</li>
+            <!-- COPY (pending Nicole) — brief 98 D3b: the founding promise on the one card it is true for (Terms §7.5); static text, no digit -->
+            <li>Founding price holds for as long as you stay</li>
           </ul>
-          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_annual">Start your <span data-trial-days></span>-day trial</a>
+          <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing_annual">Start <span data-trial-days></span> days free</a>
         </div>
       </div>
     </section>
@@ -785,13 +787,13 @@
       <h2 class="hero-headline">
         Close the gap.
       </h2>
-      <!-- PROVISIONAL (Nicole) -->
+      <!-- COPY (Nicole 2026-09-29) -->
       <p class="hero-sub">
         Elitr is open. Start your trial and meet Sol.
       </p>
-      <a href="https://app.elitr.ai" class="cta-button" data-cta="bottom">Start your <span data-trial-days></span>-day trial</a>
-      <!-- PROVISIONAL (Nicole) -->
-      <p class="cta-note"><span data-trial-days></span> days free. Cancel anytime.</p>
+      <a href="https://app.elitr.ai" class="cta-button" data-cta="bottom">Start <span data-trial-days></span> days free</a>
+      <!-- COPY (Nicole 2026-09-29) -->
+      <p class="cta-note"><span data-trial-days></span> days free. Cancel any time.</p>
     </section>
 
     <!-- FOOTER -->
@@ -801,7 +803,7 @@
         <a href="mailto:support@elitr.ai">support@elitr.ai</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
-        <!-- PROVISIONAL (Nicole) -->
+        <!-- COPY (Nicole 2026-09-29) -->
         <a href="https://app.elitr.ai" data-cta="footer">Start your trial</a>
       </div>
     </footer>
@@ -826,11 +828,11 @@
         var slot = function (name) { return card.querySelector('[data-slot="' + name + '"]'); };
         var period = plan.period === 'every-year' ? ' / year' : (plan.period === 'every-month' ? ' / month' : '');
         if (slot('price')) slot('price').textContent = fmt(plan.cents) + period;
-        // PROVISIONAL (Nicole) — the words; the figure is cents / 12, and only for a yearly plan
-        if (slot('per-month')) slot('per-month').textContent = plan.period === 'every-year' ? perMonth(plan.cents) + ' / month, billed yearly' : '';
-        // PROVISIONAL (Nicole)
+        // COPY (Nicole 2026-09-29) — the words; the figure is cents / 12, and only for a yearly plan
+        if (slot('per-month')) slot('per-month').textContent = plan.period === 'every-year' ? perMonth(plan.cents) + ' / month, billed once a year' : '';
+        // COPY (Nicole 2026-09-29)
         if (slot('trial')) slot('trial').textContent = P.trialDays + ' days free';
-        // PROVISIONAL (Nicole)
+        // COPY (Nicole 2026-09-29)
         if (slot('tax')) slot('tax').textContent = P.taxMode === 'exclusive' ? 'plus tax at checkout' : '';
       });
       document.querySelectorAll('[data-trial-days]').forEach(function (el) { el.textContent = P.trialDays; });
