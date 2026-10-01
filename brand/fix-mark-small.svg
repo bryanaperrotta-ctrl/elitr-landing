@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 220 220" color="#b89a5a">
+  <title>Elitr</title>
+  <defs>
+    <!-- small-size variant of fix-mark.svg: the aircraft and the inner ring only, heavier.
+         Same geometry as the full mark (left half drawn once, mirrored); strokes and the
+         aircraft's thin parts are thickened for 16–48 px. -->
+    <g id="half" fill="currentColor">
+      <path d="M0,-98 C-4,-92 -10,-76 -10,-42 L-10,40 C-10,56 -6,68 -5.5,76 L0,76 Z"/>
+      <polygon points="-10,-16 -100,-5 -100,5 -10,18"/>
+      <polygon points="0,64 -24,94 0,94"/>
+    </g>
+  </defs>
+  <g transform="translate(110 110)">
+    <circle r="78" fill="none" stroke="currentColor" stroke-width="9"/>
+    <use xlink:href="#half"/>
+    <use xlink:href="#half" transform="scale(-1 1)"/>
+  </g>
+</svg>

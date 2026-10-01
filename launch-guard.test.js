@@ -14,6 +14,8 @@ const ROOT = __dirname;
 const ORIGIN = 'https://www.elitr.ai';
 const PAGES = [['index.html', '/'], ['privacy/index.html', '/privacy'], ['terms/index.html', '/terms']];
 const CANONICAL = new Map(PAGES.map(([file, p]) => [file, ORIGIN + p]));
+// brief 100-A D5: the icon hrefs, in one list — G2's allowed set and G9 both read it
+const ICONS = ['/favicon.ico', '/brand/favicon.svg', '/brand/apple-touch-icon.png'];
 const rawIndex = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const rawPrivacy = fs.readFileSync(path.join(ROOT, 'privacy', 'index.html'), 'utf8');
 const rawTerms = fs.readFileSync(path.join(ROOT, 'terms', 'index.html'), 'utf8');
@@ -93,7 +95,7 @@ test('G1 (decision 1) — one pricing constant in Creem’s units; every number 
 test('G2 (decision 3) — every href is in the allowed set; every app-bound anchor carries a data-cta, and every data-cta anchor is app-bound', () => {
   // brief 100 D7: the three canonicals join as exact hrefs, from CANONICAL — not a host in EXTERNAL_HOSTS,
   // which is matched by includes and would admit any path on the host
-  const ALLOWED = new Set(['/', '/privacy', '/terms', '/legal.css', 'https://app.elitr.ai', 'mailto:support@elitr.ai', ...CANONICAL.values()]);
+  const ALLOWED = new Set(['/', '/privacy', '/terms', '/legal.css', 'https://app.elitr.ai', 'mailto:support@elitr.ai', ...CANONICAL.values(), ...ICONS]);
   const EXTERNAL_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'googletagmanager.com'];
   // pre-existing in /privacy's contact block (Jeff's, not this brief): privacy@, exactly once — G4 counts it.
   // 93-R1: the self-link to elitr.ai went with the line that carried it; an exemption for a thing that
@@ -289,12 +291,77 @@ test('G8 (brief 100) — a page names its own address: one canonical each, a sit
   assert.strictEqual((O.founder || []).length, 2, 'not two founders');
   assert.deepStrictEqual(O.sameAs, ['https://www.linkedin.com/company/elitr-ai/']);
   assert.deepStrictEqual(W.alternateName, ['elitr.ai']);
-  // NOT A PROHIBITION: no mark file exists yet. Brief 100-A adds the logo and flips this assertion.
-  assert.ok(!('logo' in O), 'the Organization carries a logo — 100-A flips this assertion when the mark file exists');
+  // brief 100-A added the logo: the Fix mark on dark, derived from brand/fix-mark.svg
+  assert.strictEqual(O.logo, ORIGIN + '/brand/logo.png', 'the Organization logo is not ' + ORIGIN + '/brand/logo.png');
+  assert.ok(fs.existsSync(path.join(ROOT, O.logo.slice(ORIGIN.length))), 'the Organization logo names a file that does not exist');
   // (5) the What-is sentence, once (brief 100 D6 — the LinkedIn tagline)
   assert.strictEqual(count(rawIndex, /Elitr is a personal travel intelligence platform for sophisticated points and miles travelers\./g), 1, 'the What-is sentence is not on the page exactly once');
   // (6) the retired word
   for (const [file, raw] of RAW) assert.ok(!/strategist/i.test(raw), '"strategist" is back in ' + file);
+});
+
+test('G9 (brief 100-A) — the mark has one source and every page shows it: one icon block, a card that matches its file, rasters that are what they claim, clean sources', () => {
+  // raw files only; PNG and ICO sizes are read from the files' own headers, never from a typed number
+  const RAW = new Map([['index.html', rawIndex], ['privacy/index.html', rawPrivacy], ['terms/index.html', rawTerms]]);
+  const file = (p) => path.join(ROOT, p.replace(/^\//, ''));
+  const png = (p) => {
+    const b = fs.readFileSync(file(p));
+    assert.ok(b.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), p + ' is not a PNG');
+    assert.strictEqual(b.slice(12, 16).toString('latin1'), 'IHDR', p + ': the first chunk is not IHDR');
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  };
+  // (1) one icon block per page, byte-identical across the three, naming exactly ICONS, each a file
+  const ICON_LINE = /<link rel="(?:icon|apple-touch-icon)"/g;
+  const blocks = [];
+  for (const [f, raw] of RAW) {
+    const runs = raw.match(/(?:  <link rel="(?:icon|apple-touch-icon)"[^\n]*\n)+/g) || [];
+    assert.strictEqual(runs.length, 1, f + ' does not carry exactly one icon block');
+    assert.strictEqual(count(raw, ICON_LINE), ICONS.length, f + ' carries an icon link outside its block, or a block missing a line');
+    blocks.push(runs[0]);
+  }
+  assert.ok(blocks.every((b) => b === blocks[0]), 'the three icon blocks are not byte-identical');
+  const hrefs = [...blocks[0].matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
+  assert.deepStrictEqual(hrefs, ICONS, 'the icon block’s hrefs are not ICONS, in order');
+  for (const i of ICONS) assert.ok(fs.existsSync(file(i)), 'ICONS names a file that does not exist: ' + i);
+  // (2) one card, on / only, and its declared size is the file's size
+  const metaOf = (prop) => { const m = new RegExp('<meta property="' + prop + '" content="([^"]*)"').exec(rawIndex); assert.ok(m, 'no ' + prop + ' on /'); return m[1]; };
+  const og = metaOf('og:image');
+  assert.ok(og.startsWith(ORIGIN + '/'), 'og:image is not on ' + ORIGIN);
+  const ogPath = og.slice(ORIGIN.length);
+  assert.ok(fs.existsSync(file(ogPath)), 'og:image names a file that does not exist: ' + ogPath);
+  const card = png(ogPath);
+  assert.deepStrictEqual([Number(metaOf('og:image:width')), Number(metaOf('og:image:height'))], [card.w, card.h], 'og:image:width/height are not the PNG’s own size (' + card.w + '×' + card.h + ')');
+  assert.ok(metaOf('og:image:alt').length > 0, 'og:image:alt is empty');
+  assert.match(rawIndex, /<meta name="twitter:card" content="summary_large_image" \/>/, 'twitter:card is not summary_large_image');
+  assert.strictEqual(count(rawIndex, /property="og:image"/g), 1, '/ does not carry exactly one og:image');
+  for (const [f, raw] of [['privacy/index.html', rawPrivacy], ['terms/index.html', rawTerms]]) assert.ok(!/og:image/.test(raw), f + ' carries an og:image — one card, one page');
+  // (3) the rasters are what they claim
+  const logo = png('/brand/logo.png');
+  assert.ok(logo.w === logo.h && logo.w >= 112, 'logo.png is ' + logo.w + '×' + logo.h + ' — square and at least 112 px (Google’s floor)');
+  assert.deepStrictEqual(png('/brand/apple-touch-icon.png'), { w: 180, h: 180 }, 'apple-touch-icon.png is not 180×180');
+  const ico = fs.readFileSync(file('/favicon.ico'));
+  assert.deepStrictEqual([ico.readUInt16LE(0), ico.readUInt16LE(2)], [0, 1], 'favicon.ico is not an ICO (reserved 0, type 1)');
+  const n = ico.readUInt16LE(4);
+  const sizes = Array.from({ length: n }, (_, k) => [ico[6 + 16 * k] || 256, ico[7 + 16 * k] || 256]);
+  assert.ok(sizes.every(([w, h]) => w === h), 'favicon.ico carries a non-square entry');
+  assert.deepStrictEqual(sizes.map(([w]) => w).sort((a, b) => a - b), [16, 32, 48], 'favicon.ico does not list exactly 16, 32 and 48');
+  // (4) the sources are clean: a viewBox, no <metadata> or c2pa (the bridge's injection), and the gold in one attribute
+  for (const f of ['brand/fix-mark.svg', 'brand/fix-mark-small.svg', 'brand/favicon.svg']) {
+    const svg = fs.readFileSync(file(f), 'utf8');
+    assert.match(svg, /viewBox="[^"]+"/, f + ' has no viewBox');
+    assert.ok(!/<metadata/i.test(svg) && !/c2pa/i.test(svg), f + ' carries <metadata> or c2pa — the content-credential block is back');
+  }
+  for (const f of ['brand/fix-mark.svg', 'brand/fix-mark-small.svg']) {
+    const svg = fs.readFileSync(file(f), 'utf8');
+    assert.match(svg, /<svg\b[^>]*\bcolor="#b89a5a"/, f + ' does not declare color="#b89a5a" on its root');
+    assert.deepStrictEqual(svg.match(/#[0-9a-fA-F]{3,8}\b/g), ['#b89a5a'], f + ' carries a hex color besides the one gold attribute');
+  }
+  // (5) the derivation is on file. The suite does NOT run it — it needs cairo and the brand fonts;
+  // it pins only that the script names both sources and all five outputs.
+  const script = fs.readFileSync(file('brand/render-assets.py'), 'utf8');
+  for (const w of ['brand/fix-mark.svg', 'brand/fix-mark-small.svg', 'favicon.ico', 'brand/favicon.svg', 'brand/apple-touch-icon.png', 'brand/logo.png', 'brand/og-image.png']) {
+    assert.ok(script.includes(w), 'render-assets.py does not name ' + w);
+  }
 });
 
 run('launch-guard.test.js');
