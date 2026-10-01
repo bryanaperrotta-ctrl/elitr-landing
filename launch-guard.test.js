@@ -10,6 +10,10 @@ const vm = require('vm');
 const cp = require('child_process');
 
 const ROOT = __dirname;
+// brief 100 D7: the site's own addresses, in one list — G2's allowed set and G8 both read it
+const ORIGIN = 'https://www.elitr.ai';
+const PAGES = [['index.html', '/'], ['privacy/index.html', '/privacy'], ['terms/index.html', '/terms']];
+const CANONICAL = new Map(PAGES.map(([file, p]) => [file, ORIGIN + p]));
 const rawIndex = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const rawPrivacy = fs.readFileSync(path.join(ROOT, 'privacy', 'index.html'), 'utf8');
 const rawTerms = fs.readFileSync(path.join(ROOT, 'terms', 'index.html'), 'utf8');
@@ -87,7 +91,9 @@ test('G1 (decision 1) — one pricing constant in Creem’s units; every number 
 });
 
 test('G2 (decision 3) — every href is in the allowed set; every app-bound anchor carries a data-cta, and every data-cta anchor is app-bound', () => {
-  const ALLOWED = new Set(['/', '/privacy', '/terms', '/legal.css', 'https://app.elitr.ai', 'mailto:support@elitr.ai']);
+  // brief 100 D7: the three canonicals join as exact hrefs, from CANONICAL — not a host in EXTERNAL_HOSTS,
+  // which is matched by includes and would admit any path on the host
+  const ALLOWED = new Set(['/', '/privacy', '/terms', '/legal.css', 'https://app.elitr.ai', 'mailto:support@elitr.ai', ...CANONICAL.values()]);
   const EXTERNAL_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'googletagmanager.com'];
   // pre-existing in /privacy's contact block (Jeff's, not this brief): privacy@, exactly once — G4 counts it.
   // 93-R1: the self-link to elitr.ai went with the line that carried it; an exemption for a thing that
@@ -231,6 +237,64 @@ test('G7 (decision 7) — one trial_cta_click push over [data-cta], the position
   assert.match(pushes[0], /'elitr_variant'/, 'the variant does not ride the event');
   assert.ok(!/onclick=/.test(index), 'an onclick survives — one listener, not five');
   assert.match(index, /installTrialCtaEvents\(\);\s*\}\);/, 'the listener is not installed on DOMContentLoaded');
+});
+
+test('G8 (brief 100) — a page names its own address: one canonical each, a sitemap and robots.txt that publish exactly those, and one Organization record on / only', () => {
+  // every read here is RAW — the JSON-LD is a <script>, and the stripped copy has been through stripJs
+  const RAW = new Map([['index.html', rawIndex], ['privacy/index.html', rawPrivacy], ['terms/index.html', rawTerms]]);
+  // (1) one canonical per page, and it is that page's own address
+  for (const [file] of PAGES) {
+    const links = [...RAW.get(file).matchAll(/<link rel="canonical" href="([^"]*)"/g)].map((m) => m[1]);
+    assert.strictEqual(count(RAW.get(file), /rel="canonical"/g), 1, file + ' does not carry exactly one rel="canonical"');
+    assert.deepStrictEqual(links, [CANONICAL.get(file)], file + ' names an address that is not its own');
+  }
+  // (2) the sitemap lists the canonicals, all of them and nothing else, with no hand-typed date
+  const smPath = path.join(ROOT, 'sitemap.xml');
+  assert.ok(fs.existsSync(smPath), 'sitemap.xml is missing');
+  const sm = fs.readFileSync(smPath, 'utf8');
+  const locs = [...sm.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+  const canon = [...CANONICAL.values()];
+  assert.strictEqual(locs.length, canon.length, 'sitemap.xml lists ' + locs.length + ' <loc>, not ' + canon.length);
+  assert.deepStrictEqual([...new Set(locs)].sort(), [...canon].sort(), 'the sitemap’s <loc> set is not the canonical set');
+  assert.ok(!/<lastmod>/.test(sm), 'a <lastmod> in sitemap.xml — a typed date goes stale (brief 100 D2)');
+  // (3) robots.txt publishes the sitemap, once, at the file that exists
+  const rbPath = path.join(ROOT, 'robots.txt');
+  assert.ok(fs.existsSync(rbPath), 'robots.txt is missing');
+  const sitemapLines = fs.readFileSync(rbPath, 'utf8').split('\n').filter((l) => /^Sitemap:/i.test(l));
+  assert.strictEqual(sitemapLines.length, 1, 'robots.txt does not carry exactly one Sitemap: line');
+  const smUrl = sitemapLines[0].replace(/^Sitemap:\s*/i, '').trim();
+  assert.strictEqual(smUrl, ORIGIN + '/sitemap.xml', 'robots.txt points somewhere other than ' + ORIGIN + '/sitemap.xml');
+  assert.ok(fs.existsSync(path.join(ROOT, smUrl.slice(ORIGIN.length))), 'the Sitemap: url is not the file at that path');
+  // (4) one record, in one place
+  const LD = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
+  assert.strictEqual(count(rawIndex, LD), 1, 'index.html does not carry exactly one JSON-LD block');
+  assert.strictEqual(count(rawPrivacy, /application\/ld\+json/g), 0, '/privacy carries JSON-LD — the organization is described in one place');
+  assert.strictEqual(count(rawTerms, /application\/ld\+json/g), 0, '/terms carries JSON-LD — the organization is described in one place');
+  const ld = JSON.parse([...rawIndex.matchAll(LD)][0][1]);
+  const graph = ld['@graph'];
+  // the positive companion: without it an empty graph would pass every check below
+  assert.ok(Array.isArray(graph) && graph.length === 2, '@graph is not exactly two nodes');
+  const org = graph.filter((n) => n['@type'] === 'Organization'), site = graph.filter((n) => n['@type'] === 'WebSite');
+  assert.ok(org.length === 1 && site.length === 1, '@graph is not one Organization and one WebSite');
+  const [O] = org, [W] = site;
+  assert.strictEqual(O.url, CANONICAL.get('index.html')); assert.strictEqual(W.url, CANONICAL.get('index.html'));
+  assert.strictEqual(W.publisher && W.publisher['@id'], O['@id'], 'the WebSite’s publisher is not the Organization');
+  const decode = (t) => t.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+  const meta = /<meta name="description" content="([^"]*)"/.exec(rawIndex);
+  assert.ok(meta, 'index.html has no description meta');
+  const desc = decode(meta[1]);
+  assert.strictEqual(O.description, desc, 'the Organization description is not the description meta — one canonical description (brief 100 D5)');
+  assert.ok([...desc].length <= 200, 'the canonical description is ' + [...desc].length + ' characters — Reddit’s profile field holds 200');
+  assert.deepStrictEqual(new Set((O.founder || []).map((f) => f.name)), new Set(['Bryan Perrotta', 'Nicole Perrotta']), 'the founders are not Bryan and Nicole');
+  assert.strictEqual((O.founder || []).length, 2, 'not two founders');
+  assert.deepStrictEqual(O.sameAs, ['https://www.linkedin.com/company/elitr-ai/']);
+  assert.deepStrictEqual(W.alternateName, ['elitr.ai']);
+  // NOT A PROHIBITION: no mark file exists yet. Brief 100-A adds the logo and flips this assertion.
+  assert.ok(!('logo' in O), 'the Organization carries a logo — 100-A flips this assertion when the mark file exists');
+  // (5) the What-is sentence, once (brief 100 D6 — the LinkedIn tagline)
+  assert.strictEqual(count(rawIndex, /Elitr is a personal travel intelligence platform for sophisticated points and miles travelers\./g), 1, 'the What-is sentence is not on the page exactly once');
+  // (6) the retired word
+  for (const [file, raw] of RAW) assert.ok(!/strategist/i.test(raw), '"strategist" is back in ' + file);
 });
 
 run('launch-guard.test.js');
