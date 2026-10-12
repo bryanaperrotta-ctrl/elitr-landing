@@ -210,7 +210,8 @@ test('G6 (decision 6; brief 98) — the early-access framing is gone, every repl
     assert.ok(re.test(rawIndex), 'a replacement site without its attribution: ' + re);
   }
   assert.strictEqual(count(rawIndex, /<!-- COPY \(Nicole 2026-09-29\) -->\s*<p class="cta-note">/g), 2, 'both cta-notes are attributed');
-  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g), 2, 'the two lines she has not seen (the cut intro, the annual bullet) are not exactly two');
+  // brief 130: the intro is hers now (2026-10-11); what she has not seen is the annual bullet and the four §C item titles
+  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g), 5, 'the lines she has not seen (the annual bullet, the four §C titles) are not exactly five');
   // her strings, verbatim (brief 98)
   assert.strictEqual(count(index, /<p class="cta-note"><span data-trial-days><\/span> days free\. Cancel any time\.<\/p>/g), 2, 'the notes are not hers');
   assert.strictEqual(count(index, /data-cta="(top|pricing|pricing_monthly|pricing_annual|bottom)">Start <span data-trial-days><\/span> days free<\/a>/g), 5, 'the five trial buttons do not read Start N days free');
@@ -219,13 +220,14 @@ test('G6 (decision 6; brief 98) — the early-access framing is gone, every repl
   const annual = index.slice(index.indexOf('data-plan="founding_annual"'), index.indexOf('data-cta="pricing_annual"'));
   const monthly = index.slice(index.indexOf('data-plan="founding_monthly"'), index.indexOf('data-cta="pricing_monthly"'));
   assert.ok(/Founding price holds/.test(annual) && !/Founding price holds/.test(monthly), 'the promise is on the wrong card — it is true for the annual plan only (Terms §7.5)');
-  assert.match(index, /<p class="pricing-intro">One membership, two ways to pay for it\. Sol reads your whole portfolio from day one\.<\/p>/, 'the intro is not the cut sentence');
+  assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\)[^>]*-->\s*<p class="pricing-intro">One membership, two ways to pay for it\. Sol reads everything you add or forward, from day one\.<\/p>/, 'the intro is not hers (brief 130 H1)');
   assert.ok(!/founding price holds for the life/i.test(index), 'the founding clause survives above both cards');
   assert.match(index, /' \/ month, billed once a year'/, 'the per-month line is not hers');
-  assert.match(rawIndex, /<title>Elitr — Sol reads your points, your cards, and what's closing this week<\/title>/);
-  assert.match(rawIndex, /<meta property="og:title" content="Elitr — Sol reads your points, your cards, and what's closing this week" \/>/);
-  assert.match(rawIndex, /<meta name="description" content="A travel intelligence platform for points-and-miles travelers\. Sol, your navigator, reads your programs and your cards and answers in specifics — what's showing, what's closing, and when it was read\." \/>/);
-  assert.match(rawIndex, /<meta property="og:description" content="When a program devalues what you've saved, Sol reads what changed and what's still open — in specifics, with the time it was read\." \/>/);
+  // brief 130 H3/H4/I: the title and og:title are one string; the description is G8's one canonical string
+  assert.match(rawIndex, /<title>Elitr — Travel intelligence\. Say what you want; Sol does the rest\.<\/title>/);
+  assert.match(rawIndex, /<meta property="og:title" content="Elitr — Travel intelligence\. Say what you want; Sol does the rest\." \/>/);
+  assert.match(rawIndex, /<meta name="description" content="Travel intelligence for people who'd rather travel than study points\. Sol reads your programs, cards and trips, then answers in specifics: award space, prices, plans and deadlines\." \/>/);
+  assert.match(rawIndex, /<meta property="og:description" content="Ask Sol what changed this week\. She reads your points, cards and trips, and tells you what applies to you, what doesn't, and why\." \/>/);
   assert.ok(!/font-style:italic; color:#6e7180; margin-top:22px/.test(rawIndex), 'the Sol section’s italic line survives');
 });
 
@@ -294,8 +296,10 @@ test('G8 (brief 100) — a page names its own address: one canonical each, a sit
   // brief 100-A added the logo: the Fix mark on dark, derived from brand/fix-mark.svg
   assert.strictEqual(O.logo, ORIGIN + '/brand/logo.png', 'the Organization logo is not ' + ORIGIN + '/brand/logo.png');
   assert.ok(fs.existsSync(path.join(ROOT, O.logo.slice(ORIGIN.length))), 'the Organization logo names a file that does not exist');
-  // (5) the What-is sentence, once (brief 100 D6 — the LinkedIn tagline)
-  assert.strictEqual(count(rawIndex, /Elitr is a personal travel intelligence platform for sophisticated points and miles travelers\./g), 1, 'the What-is sentence is not on the page exactly once');
+  // (5) the What-is sentence, once (brief 100 D6; brief 130 A3). THE PAGE CARRIES THE FULL SENTENCE; LinkedIn carries
+  // Nicole's short form, because LinkedIn caps the tagline at 120 characters and this sentence is 123. The short form
+  // lives off-site and is NOT pinned here — a copy of something this repo can't read would be a second source of truth.
+  assert.strictEqual(count(rawIndex, /Elitr is a travel intelligence platform: your points, cards and trips in one place, and a navigator who reads them for you\./g), 1, 'the What-is sentence is not on the page exactly once');
   // (6) the retired word
   for (const [file, raw] of RAW) assert.ok(!/strategist/i.test(raw), '"strategist" is back in ' + file);
 });
@@ -362,6 +366,58 @@ test('G9 (brief 100-A) — the mark has one source and every page shows it: one 
   for (const w of ['brand/fix-mark.svg', 'brand/fix-mark-small.svg', 'favicon.ico', 'brand/favicon.svg', 'brand/apple-touch-icon.png', 'brand/logo.png', 'brand/og-image.png']) {
     assert.ok(script.includes(w), 'render-assets.py does not name ' + w);
   }
+});
+
+// ── brief 130: the launch page says what Elitr is ─────────────────────────────────────────────────────────────
+test('G10 (brief 130) — the retired claims stay retired: none of them anywhere in index.html, comments included', () => {
+  // RAW, on purpose: a comment naming a retired claim is how it comes back. The list is the claims Sol can't back and the
+  // retired framing; the sections they lived in are named in brief 130, not here.
+  const RETIRED = ['signal-card', 'Waldorf', 'Kyushu', 'every certificate', 'knows every move', 'what to do by when',
+    'arrives with the move', 'sophisticated points and miles', 'Live award availability', 'Close the gap', 'Your points are losing value'];
+  for (const w of RETIRED) assert.ok(!rawIndex.includes(w), JSON.stringify(w) + ' is back in index.html');
+  // and what replaced the example cards: the Sol section's two paragraphs, hers
+  assert.match(index, /<p>She doesn't book\. When it's time, she points you to the airline or the hotel, and you buy it the way you like to\.<\/p>/);
+  // the variant plumbing GTM reads stays (post-launch cleanup, not this brief)
+  assert.strictEqual(count(rawIndex, /'elitr_variant'/g), 2, 'the elitr_variant push or the trial_cta_click field is gone');
+});
+
+test('G11 (brief 130) — the hero is the hook: the h1, tags stripped, is the locked line, the second sentence the <em>', () => {
+  const h1 = /<h1 class="hero-headline[^"]*">([\s\S]*?)<\/h1>/.exec(index);
+  assert.ok(h1, 'no hero h1');
+  assert.strictEqual(count(index, /<h1\b/g), 1, 'not exactly one h1');
+  assert.strictEqual(h1[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), "You don't have to learn the game to win it. Say what you want. Sol does the rest.");
+  assert.match(h1[1], /<em>Say what you want\. Sol does the rest\.<\/em>/, 'the second sentence is not the <em>');
+  assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\)[^>]*-->\s*<h1 class="hero-headline/, 'the hook carries no attribution');
+  assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\) -->\s*<p class="hero-sub fade-up delay-2">/, 'the hero sub carries no attribution');
+  // A4: the install line sits under the trial note, in the same div, as a note
+  const cta = slice(index, '<div class="fade-up delay-3">', '</div>', 100, 800, 'hero CTA');
+  assert.match(cta, /<p class="cta-note"><span data-trial-days><\/span> days free\. Cancel any time\.<\/p>\s*<p class="cta-note">Runs in your browser and installs like an app\. No App Store\.<\/p>/);
+});
+
+test('G12 (brief 130) — the two new sections: in order after the hero, existing classes only, four items and three steps', () => {
+  const order = ['class="hero"', '>One navigator, the whole trip<', '>How it works<', 'class="story"', '>Meet Sol<', '>What we believe<', 'id="pricing"', 'class="bottom-cta"'];
+  const at = order.map((m) => index.indexOf(m));
+  at.forEach((x, k) => assert.ok(x > 0, order[k] + ' not found'));
+  assert.deepStrictEqual([...at].sort((a, b) => a - b), at, 'the sections are out of order: ' + JSON.stringify(order));
+  // each section, its own element: from its <section> to its </section>
+  const own = (k) => index.slice(index.lastIndexOf('<section', at[k]), index.indexOf('</section>', at[k]) + 10);
+  const c = own(1), d = own(2);
+  assert.deepStrictEqual([...c.matchAll(/<div class="tenet-title">([^<]*)<\/div>/g)].map((m) => m[1]), ['Award search', 'Pricing', 'Travel planning', 'Your portfolio']);
+  assert.ok(!/tenet-num/.test(c), 'the §C items are numbered');
+  // zero-padded like the tenets: a lone old-style "1" in Cormorant reads as a roman "I" at 390 px
+  assert.deepStrictEqual([...d.matchAll(/<span class="tenet-num">(\d+)<\/span>/g)].map((m) => m[1]), ['01', '02', '03']);
+  assert.deepStrictEqual([...d.matchAll(/<div class="tenet-title"><em>([^<]*)<\/em><\/div>/g)].map((m) => m[1]), ['Add what you hold.', 'Forward the rest.', 'Ask.']);
+  // NO NEW LITERAL: neither section carries a style attribute, and every class it uses is one the stylesheet defines
+  for (const [name, sec] of [['§C', c], ['§D', d]]) {
+    assert.ok(!/style="/.test(sec), name + ' carries an inline style');
+    const css = (rawIndex.match(/<style\b[^>]*>([\s\S]*?)<\/style>/) || [])[1];
+    for (const cls of new Set([...sec.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(/\s+/)))) {
+      assert.ok(new RegExp('\\.' + cls + '\\b').test(css), name + ' uses .' + cls + ', which the stylesheet does not define');
+    }
+  }
+  // the hero, §C and §D each have their own divider after them, and the bottom h2 is hers
+  assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\) -->\s*<h2 class="hero-headline">\s*Say what you want\.\s*<\/h2>/);
+  assert.strictEqual(count(index.slice(at[0], at[3]), /<div class="divider"><\/div>/g), 3, 'the hero, §C and §D are not each followed by a divider');
 });
 
 run('launch-guard.test.js');

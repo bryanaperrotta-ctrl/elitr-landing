@@ -35,8 +35,9 @@
       window.dataLayer.push({ 'elitr_variant': variant });
     })();
   </script>
-  <title>Elitr — Sol reads your points, your cards, and what's closing this week</title>
-  <meta name="description" content="A travel intelligence platform for points-and-miles travelers. Sol, your navigator, reads your programs and your cards and answers in specifics — what's showing, what's closing, and when it was read." />
+  <!-- COPY (Nicole 2026-10-11) — the title and og:title are one string; the description meta and the Organization's description are one string (G8) -->
+  <title>Elitr — Travel intelligence. Say what you want; Sol does the rest.</title>
+  <meta name="description" content="Travel intelligence for people who'd rather travel than study points. Sol reads your programs, cards and trips, then answers in specifics: award space, prices, plans and deadlines." />
   <link rel="canonical" href="https://www.elitr.ai/" />
   <link rel="icon" href="/favicon.ico" sizes="48x48" />
   <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml" />
@@ -51,7 +52,7 @@
         "name": "Elitr",
         "url": "https://www.elitr.ai/",
         "logo": "https://www.elitr.ai/brand/logo.png",
-        "description": "A travel intelligence platform for points-and-miles travelers. Sol, your navigator, reads your programs and your cards and answers in specifics — what's showing, what's closing, and when it was read.",
+        "description": "Travel intelligence for people who'd rather travel than study points. Sol reads your programs, cards and trips, then answers in specifics: award space, prices, plans and deadlines.",
         "email": "support@elitr.ai",
         "founder": [
           { "@type": "Person", "name": "Bryan Perrotta" },
@@ -70,8 +71,9 @@
     ]
   }
   </script>
-  <meta property="og:title" content="Elitr — Sol reads your points, your cards, and what's closing this week" />
-  <meta property="og:description" content="When a program devalues what you've saved, Sol reads what changed and what's still open — in specifics, with the time it was read." />
+  <!-- COPY (Nicole 2026-10-11) -->
+  <meta property="og:title" content="Elitr — Travel intelligence. Say what you want; Sol does the rest." />
+  <meta property="og:description" content="Ask Sol what changed this week. She reads your points, cards and trips, and tells you what applies to you, what doesn't, and why." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://www.elitr.ai/brand/og-image.png" />
   <meta property="og:image:width" content="1200" />
@@ -269,87 +271,6 @@
     .story-body strong {
       color: var(--ink);
       font-weight: 500;
-    }
-
-    /* ── SIGNAL CARD ── */
-    .signal-card {
-      margin: 40px 0;
-      background: #16181c;
-      border: 1px solid rgba(184,154,90,0.15);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-
-    .signal-card-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(184,154,90,0.12);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .signal-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-      flex-shrink: 0;
-      animation: pulse 2.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .signal-card-header-text {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--ink-3);
-    }
-
-    .signal-card-body {
-      padding: 20px;
-    }
-
-    .signal-title {
-      font-family: var(--font-serif);
-      font-size: 19px;
-      font-weight: 500;
-      color: #f7f5f1;
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-
-    .signal-meta {
-      font-size: 12px;
-      color: #4a4c58;
-      margin-bottom: 16px;
-      letter-spacing: 0.01em;
-    }
-
-    .signal-message {
-      font-size: 14px;
-      line-height: 1.65;
-      color: #8a8c96;
-      padding: 14px 16px;
-      background: #0e0f11;
-      border-radius: var(--radius);
-      border-left: 2px solid var(--gold);
-    }
-
-    .signal-message strong {
-      color: #f7f5f1;
-      font-weight: 500;
-    }
-
-    .signal-from {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #4a4c58;
-      font-style: italic;
     }
 
     /* ── SOL INTRO ── */
@@ -628,11 +549,13 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-eyebrow fade-up">Travel Intelligence</div>
+      <!-- COPY (Nicole 2026-10-11) — the locked hook; its second sentence is the italic gold em -->
       <h1 class="hero-headline fade-up delay-1">
-        Your points are losing value because your programs are betting you're stuck. <em>They're wrong</em> — you have more moves than they realize.
+        You don't have to learn the game to win it. <em>Say what you want. Sol does the rest.</em>
       </h1>
+      <!-- COPY (Nicole 2026-10-11) -->
       <p class="hero-sub fade-up delay-2">
-        Elitr is a personal travel intelligence platform for sophisticated points and miles travelers.
+        Elitr is a travel intelligence platform: your points, cards and trips in one place, and a navigator who reads them for you.
       </p>
 
       <!-- TRIAL CTA (brief 93, decision 3). The waitlist form and api/waitlist.js were removed at launch
@@ -642,7 +565,88 @@
         <a href="https://app.elitr.ai" class="cta-button" data-cta="top">Start <span data-trial-days></span> days free</a>
         <!-- COPY (Nicole 2026-09-29) -->
         <p class="cta-note"><span data-trial-days></span> days free. Cancel any time.</p>
+        <!-- COPY (Nicole 2026-10-11) -->
+        <p class="cta-note">Runs in your browser and installs like an app. No App Store.</p>
       </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ONE NAVIGATOR, THE WHOLE TRIP (brief 130 C) — the tenets' title-and-description shape, without numbers; existing
+         classes only. The four titles are pending Nicole; each line is hers. -->
+    <section class="tenets">
+      <!-- COPY (Nicole 2026-10-11) -->
+      <p class="section-label">One navigator, the whole trip</p>
+      <div class="story-body">
+        <!-- COPY (Nicole 2026-10-11) -->
+        <p>Award search, price checks, trip planning and keeping track of what you hold usually take a stack of tools and a spreadsheet. Elitr is one place, and Sol reads across all of it.</p>
+      </div>
+      <ul class="tenet-list">
+        <li>
+          <div class="tenet-content">
+            <!-- COPY (pending Nicole) -->
+            <div class="tenet-title">Award search</div>
+            <!-- COPY (Nicole 2026-10-11) -->
+            <div class="tenet-desc">Award availability, included with membership. Ask for a route or a hotel; Sol tells you what was showing and when she saw it. Ask her to watch it, and she checks every day.</div>
+          </div>
+        </li>
+        <li>
+          <div class="tenet-content">
+            <!-- COPY (pending Nicole) -->
+            <div class="tenet-title">Pricing</div>
+            <!-- COPY (Nicole 2026-10-11) -->
+            <div class="tenet-desc">What a flight or a room costs in cash, beside the points price, each with the time it was read. For flights, where today's fare sits in its recent range, and how many days that range covers. The call is yours.</div>
+          </div>
+        </li>
+        <li>
+          <div class="tenet-content">
+            <!-- COPY (pending Nicole) -->
+            <div class="tenet-title">Travel planning</div>
+            <!-- COPY (Nicole 2026-10-11) -->
+            <div class="tenet-desc">Sol · Lab is where a trip starts as an idea and becomes dates, flights and nights. When it's time to book, Sol points you to the airline or the hotel.</div>
+          </div>
+        </li>
+        <li>
+          <div class="tenet-content">
+            <!-- COPY (pending Nicole) -->
+            <div class="tenet-title">Your portfolio</div>
+            <!-- COPY (Nicole 2026-10-11) -->
+            <div class="tenet-desc">Programs, balances, status and expiry dates in your Vault, and the industry changes that touch them, sorted from the ones that don't.</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- HOW IT WORKS (brief 130 D) — three steps numbered 01–03 in the tenets' shape; the italic lead is the title -->
+    <section class="tenets">
+      <!-- COPY (Nicole 2026-10-11) -->
+      <p class="section-label">How it works</p>
+      <!-- COPY (Nicole 2026-10-11) -->
+      <ul class="tenet-list">
+        <li>
+          <span class="tenet-num">01</span>
+          <div class="tenet-content">
+            <div class="tenet-title"><em>Add what you hold.</em></div>
+            <div class="tenet-desc">Type in your programs and cards, or connect a card through your bank. We never ask for your loyalty logins.</div>
+          </div>
+        </li>
+        <li>
+          <span class="tenet-num">02</span>
+          <div class="tenet-content">
+            <div class="tenet-title"><em>Forward the rest.</em></div>
+            <div class="tenet-desc">Statements and trip confirmations go to your Sol Inbox, and she reads them.</div>
+          </div>
+        </li>
+        <li>
+          <span class="tenet-num">03</span>
+          <div class="tenet-content">
+            <div class="tenet-title"><em>Ask.</em></div>
+            <div class="tenet-desc">In plain words, the way you'd ask a friend who knows the game.</div>
+          </div>
+        </li>
+      </ul>
     </section>
 
     <div class="divider"></div>
@@ -654,10 +658,12 @@
       <div class="story-body">
         <p>The biggest names in hotel loyalty are abandoning the one thing that made points plannable: the award chart. Hilton dropped its chart in 2017. Marriott followed in 2022. What replaced it is dynamic pricing — award costs that move with demand, with no ceiling and no notice. You can save toward a specific trip, hit your number, and find the price moved while you weren't looking.</p>
         <p>Here's what they're counting on: that once your points are locked in their program, you're locked in with them. That a devaluation is just a loss you absorb.</p>
-        <p>It isn't — not if someone can see the rest of what you hold. The same stay, delivered by another program in your portfolio. The balance that's better spent now than saved. The move you didn't know you had. That's the one thing your loyalty apps can't do: each of them sees only its own corner. A navigator sees the whole board.</p>
+        <!-- COPY (Nicole 2026-10-11) -->
+        <p>Every program changes on its own schedule, and every change comes with fine print about who it's for. Most of it isn't yours. Some of it is, and it has a date.</p>
       </div>
 
-      <p class="story-pull" style="margin-top:36px; font-size:clamp(19px, 3.4vw, 26px);">What you've been missing is a navigator who sees your whole portfolio, knows every move on the board, and tells you which one is yours…</p>
+      <!-- COPY (Nicole 2026-10-11) -->
+      <p class="story-pull" style="margin-top:36px; font-size:clamp(19px, 3.4vw, 26px);">Sol reads what changed against what you hold, and tells you which is which.</p>
     </section>
 
     <div class="divider"></div>
@@ -667,51 +673,6 @@
   <p class="section-label" style="font-size: 16px; color: var(--gold); margin-bottom: 28px;">Meet Sol</p>
 
   <p class="sol-thesis">Every tool shows you its piece. <em>Sol shows you your move.</em></p>
-
-  <!-- SIGNAL CARD -->
-      <!-- RECOVERY (default) -->
-      <div class="signal-card" id="signal-recovery">
-        <div class="signal-card-header">
-          <div class="signal-dot"></div>
-          <span class="signal-card-header-text">Hilton · reward devaluation</span>
-        </div>
-        <div class="signal-card-body">
-          <div class="signal-title">The Waldorf just slipped out of reach</div>
-          <div class="signal-message">
-            The Waldorf Astoria Los Cabos Pedregal has increased reward pricing — again. A room night now stands at 250,000 points. The balance that booked you 5 nights there now covers 2. That one's done; Hilton moved and didn't ask.
-            <br /><br />
-            But Hilton was a strong option for this trip, just not your only one. Hold these points for a better value play — they're worth more on a night that hasn't moved than on one that just did. I can curate a list of properties from the rest of your rewards stack that deliver on the same promise as the Waldorf. Want me to build that list now?
-          </div>
-          <div class="signal-from">— Sol</div>
-        </div>
-      </div>
-
-      <!-- BONVOY (variant: ?m=bonvoy) -->
-      <div class="signal-card" id="signal-bonvoy" style="display:none;">
-        <div class="signal-card-header">
-          <div class="signal-dot"></div>
-          <span class="signal-card-header-text">Bonvoy · the smart burn</span>
-        </div>
-        <div class="signal-card-body">
-          <div class="signal-title">Spend the points you won't miss</div>
-          <div class="signal-message">
-            Your Tokyo trip has two work nights buried in the middle — Kumamoto, then Nagasaki. Those aren't the trip; they're the cost of it. Tokyo and Hakone are the trip — so don't spend the right points on the wrong moment.
-            <br /><br />
-            Bonvoy is your play for Kumamoto and Nagasaki: deep balance, easily earned, and the Nagasaki Marriott runs about 25,000 a night. That keeps your Hyatt balance whole for the rooms you'll actually remember — the Park Hyatt, and Hakone at the end. Spend the currency you won't miss, protect the one you will. Want me to hold the Kyushu nights on Bonvoy?
-          </div>
-          <div class="signal-from">— Sol</div>
-        </div>
-      </div>
-
-      <script>
-        (function () {
-          var m = new URLSearchParams(location.search).get('m');
-          if (m === 'bonvoy') {
-            document.getElementById('signal-recovery').style.display = 'none';
-            document.getElementById('signal-bonvoy').style.display = '';
-          }
-        })();
-      </script>
 
       <div style="display:flex; align-items:center; gap:24px; margin-bottom:24px; margin-top:40px;">
         <svg width="68" height="68" viewBox="0 0 140 140" aria-label="Sol mark" style="flex-shrink:0;">
@@ -735,8 +696,10 @@
         <h2 class="sol-name">This is <em>Sol.</em></h2>
       </div>
       <div class="sol-body">
-        <p>Sol is your navigator — not a chatbot, not a search engine. Sol knows your whole portfolio: every program, every balance, every certificate. So when one program moves on you, she's already looking across the rest for the way through — the better redemption, the stronger play, the move that's yours.</p>
-        <p>She reasons from your actual situation, not an audience of thousands — whether that's a faster path to status, points better spent than saved, or turning everything you've accumulated into the trip you've been building toward.</p>
+        <!-- COPY (Nicole 2026-10-11) -->
+        <p>Sol is your navigator, not a chatbot or a search engine. She reads your Vault, your trips and what changed in the industry this week, and answers from that. When a source is unconfirmed, she says so. When there's no data, she tells you it's missing instead of guessing.</p>
+        <!-- COPY (Nicole 2026-10-11) -->
+        <p>She doesn't book. When it's time, she points you to the airline or the hotel, and you buy it the way you like to.</p>
       </div>
     </section>
 
@@ -750,7 +713,8 @@
           <span class="tenet-num">01</span>
           <div class="tenet-content">
             <div class="tenet-title">Specificity is the product</div>
-            <div class="tenet-desc">Generic advice is everywhere. "Use your points before devaluations" helps no one. Sol tells you which points, which devaluation, and what to do by when.</div>
+            <!-- COPY (Nicole 2026-10-11) — the last sentence -->
+            <div class="tenet-desc">Generic advice is everywhere. "Use your points before devaluations" helps no one. Sol tells you which points, which change, and the date it lands.</div>
           </div>
         </li>
         <li>
@@ -771,7 +735,8 @@
           <span class="tenet-num">04</span>
           <div class="tenet-content">
             <div class="tenet-title">Intelligence, not information</div>
-            <div class="tenet-desc">More alerts is not better. Sol surfaces the signals that matter to you, filters the noise, and arrives with the move — not just a notification.</div>
+            <!-- COPY (Nicole 2026-10-11) — the last sentence -->
+            <div class="tenet-desc">More alerts is not better. Sol surfaces the signals that matter to you, filters the noise, and arrives with what it means for you, not just a notification.</div>
           </div>
         </li>
       </ul>
@@ -782,8 +747,8 @@
     <!-- PRICING (brief 93, decision 2) — every number here is rendered from #elitr-pricing. -->
     <section class="pricing" id="pricing">
       <div class="section-label">Membership</div>
-      <!-- COPY (pending Nicole) — brief 98 D2: her sentence, with the founding clause moved to the annual card -->
-      <p class="pricing-intro">One membership, two ways to pay for it. Sol reads your whole portfolio from day one.</p>
+      <!-- COPY (Nicole 2026-10-11) — the founding clause stays on the annual card (brief 98 D2) -->
+      <p class="pricing-intro">One membership, two ways to pay for it. Sol reads everything you add or forward, from day one.</p>
       <div class="pricing-lead">
         <a href="https://app.elitr.ai" class="cta-button" data-cta="pricing">Start <span data-trial-days></span> days free</a>
       </div>
@@ -821,8 +786,9 @@
 
     <!-- BOTTOM CTA -->
     <section class="bottom-cta">
+      <!-- COPY (Nicole 2026-10-11) -->
       <h2 class="hero-headline">
-        Close the gap.
+        Say what you want.
       </h2>
       <!-- COPY (Nicole 2026-09-29) -->
       <p class="hero-sub">
