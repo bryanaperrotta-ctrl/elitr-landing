@@ -420,4 +420,14 @@ test('G12 (brief 130) — the two new sections: in order after the hero, existin
   assert.strictEqual(count(index.slice(at[0], at[3]), /<div class="divider"><\/div>/g), 3, 'the hero, §C and §D are not each followed by a divider');
 });
 
+test('G13 (brief 135) — the §C intro is Bryan\'s sentence, attributed to him, and the earlier one is gone', () => {
+  assert.match(rawIndex, /<!-- COPY \(Bryan 2026-10-12\) -->\s*<p>Award search, price checks, trip planning, keeping track of what you hold: that's usually a stack of tools and spreadsheets\. Elitr is one place, and Sol reads across all of it\.<\/p>/,
+    'the §C intro is not the 10/12 sentence, or its attribution moved');
+  assert.strictEqual((rawIndex.match(/that's usually a stack of tools/g) || []).length, 1, 'the sentence is on the page exactly once');
+  assert.ok(!rawIndex.includes('that’s usually'), 'a curly apostrophe — the page uses straight ones');
+  assert.ok(!rawIndex.includes('usually take a stack of tools and a spreadsheet'), 'the earlier sentence survives');
+  // the section label keeps its own attribution
+  assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\) -->\s*<p class="section-label">One navigator, the whole trip<\/p>/);
+});
+
 run('launch-guard.test.js');
