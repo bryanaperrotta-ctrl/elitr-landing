@@ -430,4 +430,15 @@ test('G13 (brief 135) — the §C intro is Bryan\'s sentence, attributed to him,
   assert.match(rawIndex, /<!-- COPY \(Nicole 2026-10-11\) -->\s*<p class="section-label">One navigator, the whole trip<\/p>/);
 });
 
+test('G14 (brief 139) — Meet Sol shows the Fix mark from the brand file at the old box, and the crosshair is gone', () => {
+  const at = rawIndex.indexOf('<section class="sol-section"');
+  assert.ok(at > 0, 'the Meet Sol section was found');
+  const sol = rawIndex.slice(at, rawIndex.indexOf('</section>', at));
+  assert.match(sol, /<img src="\/brand\/fix-mark\.svg" width="68" height="68" alt="" style="flex-shrink:0; display:block;">\s*<h2 class="sol-name">This is <em>Sol\.<\/em><\/h2>/,
+    'the mark is not the brand file at 68 px beside the heading');
+  assert.ok(!/<svg\b/.test(sol), 'an inline SVG is back in Meet Sol');
+  assert.ok(!/aria-label="Sol mark"|viewBox="0 0 140 140"/.test(rawIndex), 'the old crosshair survives somewhere on the page');
+  assert.ok(fs.existsSync(path.join(__dirname, 'brand', 'fix-mark.svg')), 'the brand file is missing');
+});
+
 run('launch-guard.test.js');
