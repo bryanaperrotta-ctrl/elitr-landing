@@ -1,1 +1,6 @@
 .DS_Store
+
+# brief 157: shots/ is working debris (raw captures, previews) except the reviewed sources and the script that derives img/shots/
+shots/*
+!shots/final/
+!shots/render-shots.py
