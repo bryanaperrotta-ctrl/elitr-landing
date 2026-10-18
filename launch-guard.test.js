@@ -480,6 +480,56 @@ function shotImages(src) {
   });
 }
 
+// gitignore matching, for .vercelignore: does `pattern` exclude repo path `p` (no leading slash)? A pattern with a slash at
+// its start or in its middle is anchored to the root; one without (a trailing slash doesn't count) matches a NAME at any
+// depth — so "shots/" excludes img/shots/ too. A trailing slash matches directories only; excluding a directory excludes
+// everything under it. * and ? stay within a segment, ** crosses them. Negation is applied in order, last match wins.
+function ignoreRegex(glob) {
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*' && glob[i + 1] === '*') { re += glob[i + 2] === '/' ? '(?:.*/)?' : '.*'; i += glob[i + 2] === '/' ? 2 : 1; }
+    else if (c === '*') re += '[^/]*';
+    else if (c === '?') re += '[^/]';
+    else re += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  }
+  return new RegExp('^' + re + '$');
+}
+function ignoredBy(lines, p) {
+  const parts = p.split('/');
+  // what a pattern can name: every directory on the path, then the path itself (a file, or a directory when it has no extension)
+  const dirs = parts.slice(0, -1).map((_, k) => parts.slice(0, k + 1).join('/'));
+  let ignored = false;
+  for (let raw of lines) {
+    raw = raw.replace(/\s+$/, '');
+    if (!raw || raw.startsWith('#')) continue;
+    const negate = raw.startsWith('!');
+    let pat = negate ? raw.slice(1) : raw;
+    const dirOnly = pat.endsWith('/');
+    if (dirOnly) pat = pat.slice(0, -1);
+    const anchored = pat.includes('/');
+    if (pat.startsWith('/')) pat = pat.slice(1);
+    const re = ignoreRegex(pat);
+    const test = (cand) => re.test(anchored ? cand : cand.split('/').pop());
+    const hit = dirs.some(test) || (!dirOnly || !/\.[A-Za-z0-9]+$/.test(p)) && test(p);
+    if (hit) ignored = !negate;
+  }
+  return ignored;
+}
+// every local path the page references: src, href and srcset values on this origin, as repo paths
+function referencedPaths(src) {
+  const out = new Set();
+  for (const m of src.matchAll(/\s(?:src|href|srcset|content)="([^"]+)"/g)) {
+    for (let u of m[1].split(',').map((x) => x.trim().split(/\s+/)[0])) {
+      if (u.startsWith(ORIGIN)) u = u.slice(ORIGIN.length) || '/';
+      if (!u.startsWith('/') || u.startsWith('//')) continue;
+      u = u.replace(/[?#].*$/, '').replace(/^\/+/, '');
+      out.add(u === '' ? 'index.html' : /\.[A-Za-z0-9]+$/.test(u) ? u : u.replace(/\/$/, '') + '/index.html');
+    }
+  }
+  return [...out];
+}
+
 test('G15 (brief 157) — every screenshot is a <picture> of one stem, sized from its file, attributed, lazy except the framed hero, and traced to a source and the script', () => {
   const shots = shotImages(rawIndex);
   // (8) the positive companion: the scan finds the nine (the pair counts two), so it can't pass by finding none
@@ -544,6 +594,19 @@ test('G15 (brief 157) — every screenshot is a <picture> of one stem, sized fro
   assert.ok(tokens.length >= 8, 'the shot tokens were not found');
   assert.deepStrictEqual([...new Set(tokens.filter(([, , v]) => COLOR.test(v)).map(([, n]) => n))], ['--shot-shadow'], 'a color literal in a shot token other than --shot-shadow');
   assert.match(slice(css, ':root {', '}', 100, 3000, ':root'), /--shot-shadow:\s*[^;]*rgba\(/, '--shot-shadow is not defined in :root');
+  // (9) .vercelignore keeps the sources off the site and NOTHING the page references: no pattern in it matches a path
+  // index.html uses (gitignore matching — "shots/" without a leading slash would drop img/shots/ and every screenshot)
+  const vignore = fs.readFileSync(path.join(ROOT, '.vercelignore'), 'utf8').split('\n');
+  const used = referencedPaths(rawIndex);
+  assert.ok(used.filter((u) => u.startsWith('img/shots/')).length === 18, 'the scan didn’t find the eighteen screenshot paths (nine PNG, nine WebP)');
+  assert.ok(used.includes('brand/favicon.svg') && used.includes('privacy/index.html'), 'the scan didn’t find the page’s other paths');
+  // the matcher, proved: a pattern without a leading slash matches at any depth; an anchored one at the root only
+  assert.ok(ignoredBy(['shots/'], 'img/shots/02-radar-active.png'), 'the matcher misses "shots/" at depth');
+  assert.ok(ignoredBy(['/shots/'], 'shots/final/01-portfolio.png') && !ignoredBy(['/shots/'], 'img/shots/02-radar-active.png'), 'the matcher anchors wrongly');
+  assert.ok(ignoredBy(['*.png'], 'brand/logo.png') && !ignoredBy(['*.png', '!brand/logo.png'], 'brand/logo.png'), 'the matcher’s globs or negation are wrong');
+  assert.ok(ignoredBy(vignore, 'shots/final/01-portfolio.png'), '.vercelignore no longer keeps shots/ off the site');
+  const dropped = used.filter((u) => ignoredBy(vignore, u));
+  assert.deepStrictEqual(dropped, [], '.vercelignore excludes paths the page references: ' + dropped.join(', '));
 });
 
 run('launch-guard.test.js');
