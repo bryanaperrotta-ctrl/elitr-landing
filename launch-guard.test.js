@@ -211,7 +211,9 @@ test('G6 (decision 6; brief 98) — the early-access framing is gone, every repl
   }
   assert.strictEqual(count(rawIndex, /<!-- COPY \(Nicole 2026-09-29\) -->\s*<p class="cta-note">/g), 2, 'both cta-notes are attributed');
   // brief 130: the intro is hers now (2026-10-11); what she has not seen is the annual bullet and the four §C item titles
-  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g), 5, 'the lines she has not seen (the annual bullet, the four §C titles) are not exactly five');
+  // brief 157: each screenshot's alt text is pending too — G15 holds those, one above each <figure>; the rest stay five
+  const pendingAlt = count(rawIndex, /<!-- COPY \(pending Nicole\) -->\s*<figure class="shot/g);
+  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g) - pendingAlt, 5, 'the lines she has not seen (the annual bullet, the four §C titles) are not exactly five');
   // her strings, verbatim (brief 98)
   assert.strictEqual(count(index, /<p class="cta-note"><span data-trial-days><\/span> days free\. Cancel any time\.<\/p>/g), 2, 'the notes are not hers');
   assert.strictEqual(count(index, /data-cta="(top|pricing|pricing_monthly|pricing_annual|bottom)">Start <span data-trial-days><\/span> days free<\/a>/g), 5, 'the five trial buttons do not read Start N days free');
@@ -439,6 +441,109 @@ test('G14 (brief 139) — Meet Sol shows the Fix mark from the brand file at the
   assert.ok(!/<svg\b/.test(sol), 'an inline SVG is back in Meet Sol');
   assert.ok(!/aria-label="Sol mark"|viewBox="0 0 140 140"/.test(rawIndex), 'the old crosshair survives somewhere on the page');
   assert.ok(fs.existsSync(path.join(__dirname, 'brand', 'fix-mark.svg')), 'the brand file is missing');
+});
+
+// ── G15 (brief 157) — the page shows the product. Every screenshot derives from a reviewed source (shots/final) through
+// shots/render-shots.py, whose PLACEMENTS table is the one place a size is stated; the markup's width/height are the
+// file's ÷ 2, read from the files' own headers, never a filename or a typed number.
+const SHOTS_DIR = path.join(ROOT, 'img', 'shots');
+function pngSize(file) {
+  const b = fs.readFileSync(file);
+  assert.ok(b.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), file + ' is not a PNG');
+  assert.strictEqual(b.slice(12, 16).toString('latin1'), 'IHDR', file + ': the first chunk is not IHDR');
+  return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+}
+function webpSize(file) {
+  const b = fs.readFileSync(file);
+  assert.ok(b.slice(0, 4).toString('latin1') === 'RIFF' && b.slice(8, 12).toString('latin1') === 'WEBP', file + ' is not a WebP');
+  const chunk = b.slice(12, 16).toString('latin1');
+  if (chunk === 'VP8X') return { w: 1 + b.readUIntLE(24, 3), h: 1 + b.readUIntLE(27, 3) };
+  if (chunk === 'VP8L') { const v = b.readUInt32LE(21); return { w: 1 + (v & 0x3fff), h: 1 + ((v >> 14) & 0x3fff) }; }
+  if (chunk === 'VP8 ') return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+  return assert.fail(file + ': an unknown WebP chunk ' + chunk);
+}
+const attr = (tag, name) => { const m = new RegExp('\\s' + name + '="([^"]*)"').exec(tag); return m ? m[1] : null; };
+// every <img> under /img/shots/, with its <picture>, its <figure> and what sits right above the figure (raw, comments kept)
+function shotImages(src) {
+  return [...src.matchAll(/<img\b[^>]*\ssrc="\/img\/shots\/[^"]*"[^>]*>/g)].map((m) => {
+    const at = m.index;
+    const picOpen = src.lastIndexOf('<picture', at), picClose = src.indexOf('</picture>', at);
+    const inPicture = picOpen >= 0 && picClose > at && src.lastIndexOf('</picture>', at) < picOpen;
+    const figOpen = src.lastIndexOf('<figure', at);
+    const inFigure = figOpen >= 0 && src.lastIndexOf('</figure>', at) < figOpen;
+    return {
+      tag: m[0], stem: (/\/img\/shots\/([^"/]+)\.png"/.exec(m[0]) || [])[1] || null,
+      picture: inPicture ? src.slice(picOpen, picClose) : null,
+      figureTag: inFigure ? src.slice(figOpen, src.indexOf('>', figOpen) + 1) : null,
+      aboveFigure: inFigure ? src.slice(Math.max(0, figOpen - 200), figOpen) : '',
+    };
+  });
+}
+
+test('G15 (brief 157) — every screenshot is a <picture> of one stem, sized from its file, attributed, lazy except the framed hero, and traced to a source and the script', () => {
+  const shots = shotImages(rawIndex);
+  // (8) the positive companion: the scan finds the nine (the pair counts two), so it can't pass by finding none
+  assert.strictEqual(shots.length, 9, 'the scan found ' + shots.length + ' screenshot images, not nine');
+  for (const s of shots) {
+    assert.ok(s.stem, 'a screenshot whose src is not /img/shots/{stem}.png: ' + s.tag);
+    // (1) in a <picture> with exactly one WebP <source> of the same stem
+    assert.ok(s.picture, s.stem + ' is not inside a <picture>');
+    const sources = [...s.picture.matchAll(/<source\b[^>]*>/g)].map((m) => m[0]);
+    assert.strictEqual(sources.length, 1, s.stem + ': its <picture> has ' + sources.length + ' <source>s, not one');
+    assert.strictEqual(attr(sources[0], 'type'), 'image/webp', s.stem + ': the <source> is not image/webp');
+    assert.strictEqual(attr(sources[0], 'srcset'), '/img/shots/' + s.stem + '.webp', s.stem + ': the WebP <source> names another stem');
+    // (2) width/height are the PNG's ÷ 2; the WebP is the PNG's size
+    const png = pngSize(path.join(SHOTS_DIR, s.stem + '.png'));
+    const webp = webpSize(path.join(SHOTS_DIR, s.stem + '.webp'));
+    assert.deepStrictEqual(webp, png, s.stem + ': the WebP is not the PNG’s size');
+    assert.ok(png.w % 2 === 0 && png.h % 2 === 0, s.stem + ': the PNG’s size is not even, so ÷ 2 isn’t a whole pixel');
+    assert.strictEqual(attr(s.tag, 'width'), String(png.w / 2), s.stem + ': width is not the PNG’s ÷ 2');
+    assert.strictEqual(attr(s.tag, 'height'), String(png.h / 2), s.stem + ': height is not the PNG’s ÷ 2');
+    // (3) a non-empty alt, and a COPY attribution immediately above its <figure>
+    assert.ok((attr(s.tag, 'alt') || '').trim().length > 0, s.stem + ': no alt text');
+    assert.ok(s.figureTag && /class="shot\b/.test(s.figureTag), s.stem + ': not inside a <figure class="shot">');
+    assert.match(s.aboveFigure, /<!-- COPY \([^)]*\)[^>]*-->\s*$/, s.stem + ': no COPY attribution immediately above its <figure>');
+    // no inline style on the new elements
+    assert.ok(!/\sstyle="/.test(s.tag + s.picture + s.figureTag), s.stem + ': an inline style on a screenshot');
+  }
+  // (4) exactly one framed shot, in the hero, eager and high priority; every other one lazy
+  const device = shots.filter((s) => /\bshot--device\b/.test(s.figureTag));
+  assert.strictEqual(count(rawIndex, /class="[^"]*\bshot--device\b[^"]*"/g), 1, 'not exactly one .shot--device');
+  assert.strictEqual(device.length, 1);
+  const heroAt = rawIndex.indexOf('<section class="hero">');
+  const hero = rawIndex.slice(heroAt, rawIndex.indexOf('</section>', heroAt));
+  assert.ok(heroAt >= 0 && hero.includes(device[0].tag), 'the framed shot is not in the hero');
+  assert.strictEqual(attr(device[0].tag, 'loading'), 'eager', 'the hero shot is not eager');
+  assert.strictEqual(attr(device[0].tag, 'fetchpriority'), 'high', 'the hero shot is not fetchpriority high');
+  for (const s of shots.filter((x) => x !== device[0])) {
+    assert.strictEqual(attr(s.tag, 'loading'), 'lazy', s.stem + ' is not loading="lazy"');
+    assert.strictEqual(attr(s.tag, 'fetchpriority'), null, s.stem + ' asks for a fetch priority');
+  }
+  // (5) the files in img/shots and the stems the page references are one set — no orphan, no dangling reference
+  const referenced = new Set(shots.map((s) => s.stem));
+  const files = fs.readdirSync(SHOTS_DIR).filter((f) => !f.startsWith('.'));
+  const stemsOf = (ext) => new Set(files.filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)));
+  assert.deepStrictEqual(files.filter((f) => !/\.(png|webp)$/.test(f)), [], 'img/shots holds a file that is neither PNG nor WebP');
+  assert.deepStrictEqual([...stemsOf('.png')].sort(), [...referenced].sort(), 'img/shots PNGs and the referenced stems differ');
+  assert.deepStrictEqual([...stemsOf('.webp')].sort(), [...referenced].sort(), 'img/shots WebPs and the referenced stems differ');
+  // (6) every stem has its reviewed source, and the script's placement table names exactly the referenced stems
+  for (const stem of referenced) assert.ok(fs.existsSync(path.join(ROOT, 'shots', 'final', stem + '.png')), stem + ' has no source in shots/final');
+  const script = fs.readFileSync(path.join(ROOT, 'shots', 'render-shots.py'), 'utf8');
+  const table = slice(script, 'PLACEMENTS = {', '}', 50, 2000, 'PLACEMENTS');
+  const placed = [...table.matchAll(/'([\w-]+)':\s*(\d+)/g)];
+  assert.deepStrictEqual(placed.map((m) => m[1]).sort(), [...referenced].sort(), 'the script’s PLACEMENTS and the page’s stems differ');
+  // …and the table IS the size: each PNG is twice its placement width
+  for (const [, stem, display] of placed) assert.strictEqual(pngSize(path.join(SHOTS_DIR, stem + '.png')).w, 2 * Number(display), stem + ': the PNG is not twice its placement width');
+  // (7) the new CSS carries no color literal: the .shot rules read tokens, and the only color among the shot tokens is the shadow's
+  const css = (rawIndex.match(/<style\b[^>]*>([\s\S]*?)<\/style>/) || [])[1];
+  const rules = [...css.matchAll(/([^{}]*\.shot[^{}]*)\{([^}]*)\}/g)];
+  assert.ok(rules.length >= 5, 'the .shot rules were not found: ' + rules.length);
+  const COLOR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/;
+  for (const [, sel, body] of rules) assert.ok(!COLOR.test(body), sel.trim() + ' carries a color literal');
+  const tokens = [...css.matchAll(/(--(?:shot|device)-[\w-]+)\s*:\s*([^;]+);/g)];
+  assert.ok(tokens.length >= 8, 'the shot tokens were not found');
+  assert.deepStrictEqual([...new Set(tokens.filter(([, , v]) => COLOR.test(v)).map(([, n]) => n))], ['--shot-shadow'], 'a color literal in a shot token other than --shot-shadow');
+  assert.match(slice(css, ':root {', '}', 100, 3000, ':root'), /--shot-shadow:\s*[^;]*rgba\(/, '--shot-shadow is not defined in :root');
 });
 
 run('launch-guard.test.js');

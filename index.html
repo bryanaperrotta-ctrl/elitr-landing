@@ -103,6 +103,15 @@
       --font-sans: 'DM Sans', system-ui, sans-serif;
       --radius: 4px;
       --radius-lg: 10px;
+      /* screenshots (brief 157) — every size and the one shadow color live here; the .shot rules read them */
+      --shot-width: 320px;
+      --shot-width-device: 300px;
+      --shot-radius: 12px;
+      --shot-shadow: 0 14px 36px rgba(14,15,17,0.22);
+      --shot-space: 28px;
+      --shot-pair-gap: 12px;
+      --device-bezel-width: 8px;
+      --device-radius: 40px;
     }
 
     html { scroll-behavior: smooth; }
@@ -365,6 +374,15 @@
       font-weight: 300;
     }
 
+    /* ── SCREENSHOTS (brief 157) ── each image follows the text it illustrates. width/height on the <img> are the file's
+       ÷ 2 (launch-guard G15), so the space is held before it loads. drop-shadow, not box-shadow: the card captures have
+       transparent rounded corners, and the shadow follows the alpha. The hero's phone frame is CSS, not baked in. */
+    .shot { max-width: min(var(--shot-width), 100%); margin: var(--shot-space) auto 0; }
+    .shot img { display: block; width: 100%; height: auto; border-radius: var(--shot-radius); filter: drop-shadow(var(--shot-shadow)); }
+    .shot--device { max-width: min(var(--shot-width-device), 100%); }
+    .shot--device img { border: var(--device-bezel-width) solid var(--ink); border-radius: var(--device-radius); }
+    .shot--pair picture + picture { display: block; margin-top: var(--shot-pair-gap); }
+
     /* ── BOTTOM CTA ── */
     .bottom-cta {
       padding: 72px 0 80px;
@@ -511,6 +529,8 @@
 
     /* ── MOBILE ── */
     @media (max-width: 480px) {
+      :root { --shot-width: 86vw; --shot-width-device: 78vw; }
+
       nav { padding-top: 20px; }
 
       .hero { padding: 52px 0 44px; }
@@ -568,6 +588,13 @@
         <!-- COPY (Nicole 2026-10-11) -->
         <p class="cta-note">Runs in your browser and installs like an app. No App Store.</p>
       </div>
+      <!-- COPY (pending Nicole) -->
+      <figure class="shot shot--device">
+        <picture>
+          <source type="image/webp" srcset="/img/shots/01-portfolio-tall.webp">
+          <img src="/img/shots/01-portfolio-tall.png" width="300" height="763" alt="Elitr's Portfolio screen: a note from Sol about a transfer bonus, four tiles (travel net worth, monthly earn, one program to check, the next trip), Radar, and an active Tokyo build that is 829k points short." loading="eager" fetchpriority="high" decoding="async">
+        </picture>
+      </figure>
     </section>
 
     <div class="divider"></div>
@@ -588,6 +615,13 @@
             <div class="tenet-title">Award search</div>
             <!-- COPY (Nicole 2026-10-11) -->
             <div class="tenet-desc">Award availability, included with membership. Ask for a route or a hotel; Sol tells you what was showing and when she saw it. Ask her to watch it, and she checks every day.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/02-radar-active.webp">
+                <img src="/img/shots/02-radar-active.png" width="320" height="396" alt="Radar's Active tab: three watches. Houston to Austin in business on December 12 with nothing showing yet, the Park Hyatt Tokyo for December 6 to 12, and Chicago to London in business in March 2027 with 38 options showing." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
         <li>
@@ -596,6 +630,13 @@
             <div class="tenet-title">Pricing</div>
             <!-- COPY (Nicole 2026-10-11) -->
             <div class="tenet-desc">What a flight or a room costs in cash, beside the points price, each with the time it was read. For flights, where today's fare sits in its recent range, and how many days that range covers. The call is yours.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/03-lab-build-planned.webp">
+                <img src="/img/shots/03-lab-build-planned.png" width="320" height="450" alt="A Tokyo trip in Sol · Lab: United flights out and back and six nights at the Park Hyatt Tokyo, each with its points price and its dated cash price." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
         <li>
@@ -604,6 +645,13 @@
             <div class="tenet-title">Travel planning</div>
             <!-- COPY (Nicole 2026-10-11) -->
             <div class="tenet-desc">Sol · Lab is where a trip starts as an idea and becomes dates, flights and nights. When it's time to book, Sol points you to the airline or the hotel.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/03-lab-booked-block.webp">
+                <img src="/img/shots/03-lab-booked-block.png" width="320" height="309" alt="The Tokyo trip marked Booked, listing four confirmed United flights and the Park Hyatt Tokyo stay." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
         <li>
@@ -612,6 +660,13 @@
             <div class="tenet-title">Your portfolio</div>
             <!-- COPY (Nicole 2026-10-11) -->
             <div class="tenet-desc">Programs, balances, status and expiry dates in your Vault, and the industry changes that touch them, sorted from the ones that don't.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/04-vault-programs.webp">
+                <img src="/img/shots/04-vault-programs.png" width="320" height="267" alt="The Vault's loyalty programs: Amex Membership Rewards, United MileagePlus at Premier Gold, World of Hyatt at Explorist, and Hilton Honors at Gold, each with its balance." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
       </ul>
@@ -637,6 +692,13 @@
           <div class="tenet-content">
             <div class="tenet-title"><em>Forward the rest.</em></div>
             <div class="tenet-desc">Statements and trip confirmations go to your Sol Inbox, and she reads them.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/05-brief-flights.webp">
+                <img src="/img/shots/05-brief-flights.png" width="320" height="662" alt="The Travel Brief for the Tokyo trip, built from forwarded confirmations: the outbound through Los Angeles and the return through Houston, each flight with its times, seat and cabin." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
         <li>
@@ -664,6 +726,13 @@
 
       <!-- COPY (Nicole 2026-10-11) -->
       <p class="story-pull" style="margin-top:36px; font-size:clamp(19px, 3.4vw, 26px);">Sol reads what changed against what you hold, and tells you which is which.</p>
+      <!-- COPY (pending Nicole) -->
+      <figure class="shot">
+        <picture>
+          <source type="image/webp" srcset="/img/shots/06-radar-inbound.webp">
+          <img src="/img/shots/06-radar-inbound.png" width="320" height="372" alt="Radar's Inbound tab: industry changes with their dates, including a Hilton Honors promotion through December 31 and an Amex Platinum hotel-credit rule that takes effect January 1, 2027." loading="lazy" decoding="async">
+        </picture>
+      </figure>
     </section>
 
     <div class="divider"></div>
@@ -714,6 +783,17 @@
           <div class="tenet-content">
             <div class="tenet-title">Your portfolio is not average</div>
             <div class="tenet-desc">The right move depends on your balances, your travel patterns, your preferred programs. Elitr is not a publication — it reasons from your actual situation.</div>
+            <!-- COPY (pending Nicole) -->
+            <figure class="shot shot--pair">
+              <picture>
+                <source type="image/webp" srcset="/img/shots/07-profile-companions.webp">
+                <img src="/img/shots/07-profile-companions.png" width="320" height="122" alt="Profile: who you travel with, Nicole, spouse." loading="lazy" decoding="async">
+              </picture>
+              <picture>
+                <source type="image/webp" srcset="/img/shots/07-profile-cabin.webp">
+                <img src="/img/shots/07-profile-cabin.png" width="320" height="101" alt="Profile: a cabin floor of Business, where Sol starts planning." loading="lazy" decoding="async">
+              </picture>
+            </figure>
           </div>
         </li>
         <li>
