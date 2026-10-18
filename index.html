@@ -285,6 +285,7 @@
     /* ── SOL INTRO ── */
     .sol-section {
       padding: 64px 0;
+      border-radius: var(--shot-radius);   /* brief 157-R1: one radius with the screenshots */
     }
 
     .sol-thesis {
@@ -530,6 +531,7 @@
     /* ── MOBILE ── */
     @media (max-width: 480px) {
       :root { --shot-width: 86vw; --shot-width-device: 78vw; }
+      .sol-section { border-radius: 0; }   /* edge to edge on a phone (margin: 0 -24px) — square at the screen's edge */
 
       nav { padding-top: 20px; }
 
@@ -549,6 +551,10 @@
         flex-direction: column;
         align-items: flex-start;
       }
+    }
+
+    @media (min-width: 768px) {
+      :root { --shot-width-device: 360px; }
     }
   </style>
 </head>
@@ -592,7 +598,7 @@
       <figure class="shot shot--device">
         <picture>
           <source type="image/webp" srcset="/img/shots/01-portfolio-tall.webp">
-          <img src="/img/shots/01-portfolio-tall.png" width="300" height="763" alt="Elitr's Portfolio screen: a note from Sol about a transfer bonus, four tiles (travel net worth, monthly earn, one program to check, the next trip), Radar, and an active Tokyo build that is 829k points short." loading="eager" fetchpriority="high" decoding="async">
+          <img src="/img/shots/01-portfolio-tall.png" width="360" height="916" alt="Elitr's Portfolio screen: a note from Sol about a transfer bonus, four tiles (travel net worth, monthly earn, one program to check, the next trip), Radar, and an active Tokyo build that is 829k points short." loading="eager" fetchpriority="high" decoding="async">
         </picture>
       </figure>
     </section>

@@ -23,7 +23,7 @@ SRC, OUT = 'shots/final', 'img/shots'
 
 # stem → display width in CSS px (the page's own section names)
 PLACEMENTS = {
-    '01-portfolio-tall':      300,   # hero, in the device frame
+    '01-portfolio-tall':      360,   # hero, in the device frame (brief 157-R1: drawn at 360 on desktop)
     '02-radar-active':        320,   # One navigator › Award search
     '03-lab-build-planned':   320,   # One navigator › Pricing
     '03-lab-booked-block':    320,   # One navigator › Travel planning
