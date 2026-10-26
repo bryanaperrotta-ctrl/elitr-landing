@@ -114,7 +114,10 @@ test('G2 (decision 3) — every href is in the allowed set; every app-bound anch
   assert.deepStrictEqual(bad, [], 'an href outside the allowed set — a new destination is a guard failure, not a style choice (brief 93 decision 3)');
   const ctaAnchors = [...index.matchAll(/<a\b[^>]*data-cta="([^"]*)"[^>]*>/g)];
   for (const m of ctaAnchors) assert.match(m[0], /href="https:\/\/app\.elitr\.ai"/, 'a data-cta anchor not bound to the app: ' + m[0]);
-  const appAnchors = [...index.matchAll(/<a\b[^>]*href="https:\/\/app\.elitr\.ai"[^>]*>/g)];
+  // brief 187: the header's Sign in is the ONE app-bound anchor with no position — a member signing in is not a trial click
+  // (G16 holds it); every other app-bound anchor, anywhere outside the <nav>, still carries one
+  const navAt = index.indexOf('<nav>'), navEnd = index.indexOf('</nav>', navAt);
+  const appAnchors = [...index.matchAll(/<a\b[^>]*href="https:\/\/app\.elitr\.ai"[^>]*>/g)].filter((m) => m.index < navAt || m.index > navEnd);
   for (const m of appAnchors) assert.match(m[0], /data-cta="[a-z_]+"/, 'an app-bound anchor with no position — a click the funnel cannot see: ' + m[0]);
   assert.ok(ctaAnchors.length >= 5, 'fewer than five data-cta anchors (hero, two cards, bottom, footer) — a FLOOR, a copy pass may add one');
   const positions = ctaAnchors.map((m) => m[1]);
@@ -213,7 +216,10 @@ test('G6 (decision 6; brief 98) — the early-access framing is gone, every repl
   // brief 130: the intro is hers now (2026-10-11); what she has not seen is the annual bullet and the four §C item titles
   // brief 157: each screenshot's alt text is pending too — G15 holds those, one above each <figure>; the rest stay five
   const pendingAlt = count(rawIndex, /<!-- COPY \(pending Nicole\) -->\s*<figure class="shot/g);
-  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g) - pendingAlt, 5, 'the lines she has not seen (the annual bullet, the four §C titles) are not exactly five');
+  // brief 187: the header's Sign in is pending her too — G16 holds that one; the rest stay five
+  const pendingSignIn = count(rawIndex, /<!-- COPY \(pending Nicole\) — brief 187[^>]*-->\s*<a href="https:\/\/app\.elitr\.ai" class="nav-contact">Sign in<\/a>/g);
+  assert.strictEqual(pendingSignIn, 1, 'the header’s Sign in does not carry its pending attribution');
+  assert.strictEqual(count(rawIndex, /<!-- COPY \(pending Nicole\)/g) - pendingAlt - pendingSignIn, 5, 'the lines she has not seen (the annual bullet, the four §C titles) are not exactly five');
   // her strings, verbatim (brief 98)
   assert.strictEqual(count(index, /<p class="cta-note"><span data-trial-days><\/span> days free\. Cancel any time\.<\/p>/g), 2, 'the notes are not hers');
   assert.strictEqual(count(index, /data-cta="(top|pricing|pricing_monthly|pricing_annual|bottom)">Start <span data-trial-days><\/span> days free<\/a>/g), 5, 'the five trial buttons do not read Start N days free');
@@ -607,6 +613,18 @@ test('G15 (brief 157) — every screenshot is a <picture> of one stem, sized fro
   assert.ok(ignoredBy(vignore, 'shots/final/01-portfolio.png'), '.vercelignore no longer keeps shots/ off the site');
   const dropped = used.filter((u) => ignoredBy(vignore, u));
   assert.deepStrictEqual(dropped, [], '.vercelignore excludes paths the page references: ' + dropped.join(', '));
+});
+
+test('G16 (brief 187) — the header signs a member in: one link to the app, worded Sign in, with no data-cta, so it is never a trial click', () => {
+  const nav = slice(index, '<nav>', '</nav>', 100, 1200, 'the header');
+  const app = [...nav.matchAll(/<a\b[^>]*href="https:\/\/app\.elitr\.ai"[^>]*>([^<]*)<\/a>/g)];
+  assert.strictEqual(app.length, 1, 'the header does not have exactly one link to https://app.elitr.ai');
+  assert.ok(!/data-cta/.test(app[0][0]), 'the header’s Sign in carries a data-cta — every sign-in would count as a trial click: ' + app[0][0]);
+  assert.strictEqual(app[0][1], 'Sign in', 'the header’s app link is not worded Sign in (Nicole: sign-in, never login)');
+  assert.match(app[0][0], /class="nav-contact"/, 'Sign in is not styled as the header’s quiet link');
+  assert.ok(nav.includes('href="mailto:support@elitr.ai"'), 'support@ left the header');
+  // the one trial listener reads only [data-cta], so an anchor without one is never pushed (G7 holds the listener)
+  assert.ok(!/login/i.test(nav.replace(/<!--[\s\S]*?-->/g, '')), 'the header says login');
 });
 
 run('launch-guard.test.js');

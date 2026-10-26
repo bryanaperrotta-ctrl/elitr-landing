@@ -496,7 +496,7 @@
 
     .footer-wordmark span { color: var(--gold); }
 
-    .footer-links {
+    .nav-links, .footer-links {   /* brief 187: the header's two links sit on the footer's spacing */
       display: flex;
       gap: 24px;
       align-items: center;
@@ -569,7 +569,11 @@
     <!-- NAV -->
     <nav>
       <a href="/" class="wordmark">Elitr<span>.</span></a>
-      <a href="mailto:support@elitr.ai" class="nav-contact">support@elitr.ai</a>
+      <div class="nav-links">
+        <!-- COPY (pending Nicole) — brief 187: a member's way in ("sign-in, never login"); no data-cta, so signing in is never a trial click -->
+        <a href="https://app.elitr.ai" class="nav-contact">Sign in</a>
+        <a href="mailto:support@elitr.ai" class="nav-contact">support@elitr.ai</a>
+      </div>
     </nav>
 
     <!-- HERO -->
